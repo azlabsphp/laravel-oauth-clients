@@ -1,0 +1,43 @@
+{
+    "name": "drewlabs/lv-oauth-clients",
+    "description": "drewlabs/oauth-clients bindings for laravel framework",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "oauth",
+        "clients"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Drewlabs\\Laravel\\Oauth\\Clients\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "azandrew-sidoine",
+            "email": "azandrewdevelopper@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.1|^8.0",
+        "drewlabs/core-helpers": "^0.2.2",
+        "drewlabs/oauth-clients": "^0.2.0",
+        "drewlabs/query-contracts": "^0.2.0",
+        "illuminate/console": "^8.0|^9.0|^10.0",
+        "illuminate/database": "^8.0|^9.0|^10.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Drewlabs\\Laravel\\Oauth\\Clients\\ServiceProvider"
+            ]
+        }
+    }
+}

@@ -5,7 +5,6 @@ namespace Drewlabs\Laravel\Oauth\Middleware;
 use Closure;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
-use Illuminate\Http\Request;
 use InvalidArgumentException;
 
 final class FirstPartyClients

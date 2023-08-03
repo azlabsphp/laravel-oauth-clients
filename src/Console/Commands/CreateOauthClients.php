@@ -14,13 +14,13 @@ use Symfony\Component\Console\Exception\InvalidArgumentException;
 use RuntimeException;
 use Symfony\Component\Console\Exception\LogicException;
 
-class CreateAuthorizedClientCommand extends Command
+class CreateOauthClients extends Command
 {
 
     /**
      * @var string
      */
-    protected $signature = 'drewlabs:authorized-clients:create '
+    protected $signature = 'drewlabs:oauth-clients:create '
         . '{name : Name of the client to generate} '
         . '{--id= : Client ID} '
         . '{--secret= : Client Secret} '

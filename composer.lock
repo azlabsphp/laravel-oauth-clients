@@ -250,16 +250,16 @@
         },
         {
             "name": "drewlabs/oauth-clients",
-            "version": "v0.2.10",
+            "version": "v0.2.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/oauth-clients.git",
-                "reference": "32585671ba84c6e94a9d0ef075a198f6e9d206a8"
+                "reference": "3278670bb607670138090f7fb94b9df7c5aafd52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/oauth-clients/zipball/32585671ba84c6e94a9d0ef075a198f6e9d206a8",
-                "reference": "32585671ba84c6e94a9d0ef075a198f6e9d206a8",
+                "url": "https://api.github.com/repos/azlabsphp/oauth-clients/zipball/3278670bb607670138090f7fb94b9df7c5aafd52",
+                "reference": "3278670bb607670138090f7fb94b9df7c5aafd52",
                 "shasum": ""
             },
             "require": {
@@ -294,9 +294,9 @@
             ],
             "support": {
                 "issues": "https://github.com/azlabsphp/oauth-clients/issues",
-                "source": "https://github.com/azlabsphp/oauth-clients/tree/v0.2.10"
+                "source": "https://github.com/azlabsphp/oauth-clients/tree/v0.2.13"
             },
-            "time": "2023-08-03T13:49:28+00:00"
+            "time": "2023-08-03T18:39:26+00:00"
         },
         {
             "name": "drewlabs/query-contracts",

@@ -31,7 +31,7 @@ class ClientsProvider implements ClientProviderInterface
         $this->secretVerifier = $secretVerifier;
     }
 
-    public function __invoke(CredentialsIdentityInterface $credentials)
+    public function __invoke(CredentialsIdentityInterface $credentials): ?ClientInterface
     {
         return $this->findByCredentials($credentials);
     }

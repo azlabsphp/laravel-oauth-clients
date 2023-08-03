@@ -11,6 +11,7 @@ use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\NewClientInterface;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client as Model;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use RuntimeException;
 
 class ClientsRepository implements AbstractClientsRepository
 {
@@ -19,7 +20,7 @@ class ClientsRepository implements AbstractClientsRepository
      */
     private $secretHasher;
     /**
-     * @var int
+     * @var int|callable
      */
     private $keyLength;
 
@@ -33,25 +34,23 @@ class ClientsRepository implements AbstractClientsRepository
      * 
      * @param Builder $builder 
      * @param HashesClientSecret $secretHasher 
-     * @param int $keyLength 
+     * @param int|callable $keyLength 
      */
-    public function __construct(Builder $builder, HashesClientSecret $secretHasher, int $keyLength = 32)
+    public function __construct(Builder $builder, HashesClientSecret $secretHasher, $keyLength = 32)
     {
         $this->builder = $builder;
         $this->secretHasher = $secretHasher;
         $this->keyLength = $keyLength ?? 32;
     }
 
-    public function findByUserId($identifier): ClientInterface
+    public function findByUserId($identifier): array
     {
-        /**
-         * @var Model
-         */
-        $client = $this->builder->where('user_id', (string)$identifier)->first();
-        return null === $client ? null : new Client($client);
+        return $this->builder->where('user_id', (string)$identifier)->get()->map(function ($client) {
+            return new Client($client);
+        })->all();
     }
 
-    public function findById($id): ClientInterface
+    public function findById($id): ?ClientInterface
     {
         /**
          * @var Model
@@ -79,33 +78,34 @@ class ClientsRepository implements AbstractClientsRepository
             'expires_on' => $attributes->getExpiresAt(),
             'personal_access_client' => $attributes->isPersonalClient(),
             'password_client' => $attributes->isPasswordClient(),
-            'scopes' => $attributes->getScopes() ?? [],
-            'revoked' => boolval($attributes->getRevoked()),
+            'scopes' => $attributes->getScopes(),
+            'revoked' => $attributes->getRevoked(),
         ];
 
         // Remove null values from the attributes array
-        $attributes = array_filter($attributes, function($attribute) {
+        $attributes = array_filter($attributes, function ($attribute) {
             return null !== $attribute;
         });
 
-        /**
-         * @var Model
-         */
-        $client = $this->builder->create($attributes);
+        // Update the client with provided attributes
+        $this->builder->where('id', $id)->update($attributes);
 
-        $callback = $callback ?? function (ClientInterface $client) {
+        // Query for client if the result of the update query is not 0
+        $client = $this->builder->where('id', (string)$id)->first();
+
+        $callback = $callback ?? function (ClientInterface $client = null) {
             return $client;
         };
 
         // Call the callback function on the new client instance
-        return call_user_func_array($callback, [new Client($client, $plainText)]);
+        return call_user_func_array($callback, [null === $client ? null : new Client($client, $plainText)]);
     }
 
     public function create(NewClientInterface $attributes, ?Closure $callback = null)
     {
         $plainText = $attributes->getSecret();
         if (null === $plainText) {
-            $plainText = Rand::key($this->keyLength);
+            $plainText = $this->createSecret();
         }
         /**
          * @var Model
@@ -114,7 +114,7 @@ class ClientsRepository implements AbstractClientsRepository
             'id' => $attributes->getId() ?? null,
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
-            'ip_addresses' => $attributes->getIpAddresses(),
+            'ip_addresses' => $attributes->getIpAddresses() ?? [],
             'secret' => $this->secretHasher->hashSecret($plainText),
             'redirect' => $attributes->getRedirectUrl(),
             'provider' => $attributes->getProvider() ?? 'local',
@@ -141,5 +141,24 @@ class ClientsRepository implements AbstractClientsRepository
             return $value;
         };
         return call_user_func_array($callback, [$result]);
+    }
+
+    /**
+     * Create client secret key
+     * 
+     * @return string 
+     */
+    private function createSecret()
+    {
+        if (is_int($this->keyLength)) {
+            return Rand::key($this->keyLength);
+        }
+        $key = call_user_func($this->keyLength);
+
+        if (!is_string($key)) {
+            throw new RuntimeException('Key generator must return a valid PHP string');
+        }
+
+        return $key;
     }
 }

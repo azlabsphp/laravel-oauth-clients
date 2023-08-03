@@ -13,6 +13,11 @@
             "Drewlabs\\Laravel\\Oauth\\Clients\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Drewlabs\\Laravel\\Oauth\\Clients\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "azandrew-sidoine",

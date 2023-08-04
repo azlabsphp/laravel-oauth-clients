@@ -1,6 +1,6 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Drewlabs\Core\Helpers\Arr;
 
@@ -28,8 +28,8 @@ trait InteractsWithRequest
      */
     public function getRequestIp($request)
     {
-        $request = \is_array($addresses = $this->ips()) ? Arr::first($addresses) : $addresses;
-        return empty($request) ? $this->getHeader($request, 'X-Real-IP') : $request;
+        $reqAddr = \is_array($addresses = $request->ips()) ? Arr::first($addresses) : $addresses;
+        return empty($reqAddr) ? $this->getHeader($request, 'X-Real-IP') : $reqAddr;
     }
 
     /**

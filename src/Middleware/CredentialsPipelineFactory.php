@@ -1,8 +1,10 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Drewlabs\Core\Helpers\Functional;
+
+use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;
 
 class CredentialsPipelineFactory
 {
@@ -44,7 +46,7 @@ class CredentialsPipelineFactory
      * 
      * @param \Illuminate\Http\Request $request
      * 
-     * @return callable 
+     * @return callable|(\Closure(null):CredentialsIdentityInterface)
      */
     public function create($request)
     {
@@ -83,7 +85,7 @@ class CredentialsPipelineFactory
 
             function ($credentials = null) use ($request) {
                 if (null === $credentials) {
-                    return $this->jwtClientFromAuthorizationHeader($request, $this->appKey, $this->cookie ?? 'jwt-cookie');
+                    return $this->jwtClientFromAuthorizationHeader($request, $this->appKey, $this->method ?? 'jwt');
                 }
                 return $credentials;
             }

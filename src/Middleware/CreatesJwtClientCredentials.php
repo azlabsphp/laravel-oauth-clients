@@ -1,6 +1,6 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Drewlabs\Oauth\Clients\Exceptions\InvalidTokenException;
 use Drewlabs\Oauth\Clients\Exceptions\InvalidTokenSignatureException;
@@ -25,18 +25,17 @@ trait CreatesJwtClientCredentials
     {
         $jwtToken = $this->getRequestCookie($request, $cookieName);
 
-        if (null === $jwtToken) {
+        if (empty($jwtToken)) {
             return null;
         }
-
         return JwtTokenCredentials::new($key, (string)$jwtToken);
     }
 
     public function jwtClientFromAuthorizationHeader($request, string $key, $method = 'jwt')
     {
-        $jwtToken = $this->getHeader($request, 'authorization', $method);
+        $jwtToken = $this->getAuthorizationHeader($request, 'authorization', $method);
         // return a basic auth credential instance
-        if (null === $jwtToken) {
+        if (empty($jwtToken)) {
             return null;
         }
         return JwtTokenCredentials::new($key, (string)$jwtToken);

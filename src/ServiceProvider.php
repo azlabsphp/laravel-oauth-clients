@@ -2,12 +2,12 @@
 
 namespace Drewlabs\Laravel\Oauth\Clients;
 
-use App\Http\Middleware\JwtAuthClients;
 use Drewlabs\Laravel\Oauth\Clients\Console\Commands\CreateOauthClients;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository as EloquentClientsRepository;
-use Drewlabs\Laravel\Oauth\Middleware\CredentialsPipelineFactory;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialsPipelineFactory;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
 use Drewlabs\Oauth\Clients\Argon2iHashClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;

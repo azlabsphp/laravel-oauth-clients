@@ -1,6 +1,6 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Drewlabs\Oauth\Clients\BasicAuthCredentials;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;

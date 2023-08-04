@@ -9,10 +9,13 @@
 | Defines drewlabs/server-authorized-clients packages configurations
 |
 */
+
+use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client;
+
 return [
     'clients' => [
-        'model' => null,
-        'hash' => false
+        'model' => Client::class,
+        'hash' => true
     ],
 
     'credentials' => [

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
@@ -26,7 +26,6 @@ class BasicAuthClients
         $this->validator = $validator;
     }
 
-
     /**
      * Handle an incoming request
      * 
@@ -37,7 +36,7 @@ class BasicAuthClients
      * @throws InvalidArgumentException 
      * @throws AuthorizationException 
      */
-    public function handle($request, Closure $next, ...$scopes)
+    public function handle($request, callable $next, ...$scopes)
     {
         if (null === ($credentials = $this->basicAuthClientCredentials($request))) {
             // throw not found exception if base64 is null or false

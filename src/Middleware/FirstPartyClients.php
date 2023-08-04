@@ -1,6 +1,6 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
@@ -42,12 +42,12 @@ final class FirstPartyClients
      * @throws InvalidArgumentException 
      * @throws AuthorizationException 
      */
-    public function handle($request, Closure $next)
+    public function handle($request, callable $next)
     {
         $pipeline = $this->factory->create($request);
 
         // Create credentials using pipeline
-        $credentials = call_user_func($pipeline);
+        $credentials = call_user_func($pipeline, null);
 
         // throw an exception if the credentials is not found
         if (null === $credentials) {

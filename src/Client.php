@@ -102,10 +102,15 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     public function __toArray()
     {
         $attributes = $this->model->toArray();
+        $attributes['personal_access_client'] = boolval($attributes['personal_access_client'] ?? false);
+        $attributes['password_client'] = boolval($attributes['password_client'] ?? false);
+        $attributes['revoked'] = $this->isRevoked();
+        $attributes['ip_addresses'] = $this->getIpAddressesAttribute();
+        $attributes['scopes'] = $this->getScopes();
         $plainTextSecret = $this->plainTextSecret;
         if (null === $plainTextSecret) {
             $plainTextSecret = sprintf("%s***", uniqid());
         }
-        $attributes['client_secret'] = $plainTextSecret;
+        $attributes['plain_secret'] = $plainTextSecret;
     }
 }

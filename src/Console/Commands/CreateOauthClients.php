@@ -74,18 +74,20 @@ class CreateOauthClients extends Command
     {
         $ips = $this->option('ips');
         $scopes = $this->option('scopes');
-        $client = $this->clientsRepository->create(
-            (new NewClient($this->option('id'), $this->option('personal'), $this->option('password')))
-                ->setName($this->argument('name'))
-                ->setIpAddresses(empty($ips) ? null : $ips)
-                ->setAppUrl($this->option('app_url'))
-                ->setExpiresAt($this->option('expires_on'))
-                ->setRevoked(false)
-                ->setRedirectUrl($this->option('redirect'))
-                ->setProvider($this->option('provider'))
-                ->setScopes(empty($scopes) ? [] : $scopes)
-                ->setSecret($this->option('secret'))
-        );
+        $id = $this->option('id');
+        $newClient = (new NewClient($id, $this->option('personal'), $this->option('password')))
+            ->setName($this->argument('name'))
+            ->setIpAddresses(empty($ips) ? null : $ips)
+            ->setAppUrl($this->option('app_url'))
+            ->setExpiresAt($this->option('expires_on'))
+            ->setRevoked(false)
+            ->setRedirectUrl($this->option('redirect'))
+            ->setProvider($this->option('provider'))
+            ->setScopes(empty($scopes) ? [] : $scopes)
+            ->setSecret($this->option('secret'));
+
+        $client = null !== $id ? $this->clientsRepository->updateById($id, $newClient) : $this->clientsRepository->create($newClient);
+
         $this->info('Client successfully created!');
         $this->info(sprintf('Client ID: %s', $client->getKey()));
         $this->info(sprintf('Client Authorized Addresses: %s', Str::join($client->getIpAddressesAttribute(), ', ')));

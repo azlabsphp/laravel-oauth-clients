@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
-use Drewlabs\Laravel\Oauth\Middleware\CreatesJwtClientCredentials;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use InvalidArgumentException;
@@ -61,7 +60,7 @@ class JwtAuthClients
      * @throws InvalidArgumentException 
      * @throws AuthorizationException 
      */
-    public function handle($request, Closure $next, ...$scopes)
+    public function handle($request, callable $next, ...$scopes)
     {
         // Get credentials from request cookies
         $credentials = $this->jwtClientCredentialFromCookie($request, $this->appKey, $this->cookieName);

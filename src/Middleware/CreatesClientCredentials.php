@@ -1,10 +1,9 @@
 <?php
 
-namespace Drewlabs\Laravel\Oauth\Middleware;
+namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;
 use Drewlabs\Oauth\Clients\Credentials;
-use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 
 trait CreatesClientCredentials
 {
@@ -42,12 +41,12 @@ trait CreatesClientCredentials
     {
         // query for client secret header value
         if (null === ($secret = $this->getClientSecret($request))) {
-            throw new AuthorizationException('client secret header value not found');
+            return null;
         }
 
         // query fir client id header value
         if (null === ($client = $this->getClientId($request))) {
-            throw new AuthorizationException('client id header value not found');
+            return null;
         }
 
         return new Credentials((string)$client, (string)$secret);
@@ -84,15 +83,12 @@ trait CreatesClientCredentials
      */
     private function getClientId($request)
     {
-        
-        // We search for authorization secret using all possible header values
-        // in order to support legacy applications
-        $secret = $this->getHeader($request, 'x-authorization-client-id', null);
-        $secret = $secret ?? $this->getHeader($request, 'x-client-id', null);
-        $secret = $secret ?? $this->getHeader($request, 'x-authorization-client-token', null);
+        $clientId = $this->getHeader($request, 'x-authorization-client-id', null);
+        $clientId = $clientId ?? $this->getHeader($request, 'x-client-id', null);
+        $clientId = $clientId ?? $this->getHeader($request, 'x-authorization-client-token', null);
 
-        if (null !== $secret) {
-            return $secret;
+        if (null !== $clientId) {
+            return $clientId;
         }
 
         return $request->input('client_id');

@@ -29,7 +29,7 @@ class BasicAuthClients
     /**
      * Handle an incoming request
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @param Closure $next 
      * @param mixed $scopes 
      * @return mixed 

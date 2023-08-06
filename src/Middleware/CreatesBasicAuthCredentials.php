@@ -14,7 +14,7 @@ trait CreatesBasicAuthCredentials
     /**
      * Creates basic auth credentials from request instance
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @return null|CredentialsIdentityInterface 
      * @throws DecodeTokenException 
      * @throws MalformedBasicAuthException 

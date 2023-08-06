@@ -44,7 +44,7 @@ class CredentialsPipelineFactory
     /**
      * Create a callable that resolve client credentials from request instance
      * 
-     * @param \Illuminate\Http\Request $request
+     * @param mixed $request
      * 
      * @return callable|(\Closure(null):CredentialsIdentityInterface)
      */

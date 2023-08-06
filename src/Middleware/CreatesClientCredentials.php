@@ -12,7 +12,7 @@ trait CreatesClientCredentials
     /**
      * Creates client credentials from request cookie
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @return null|CredentialsIdentityInterface 
      */
     private function fromCookie($request): ?CredentialsIdentityInterface
@@ -34,7 +34,7 @@ trait CreatesClientCredentials
     /**
      * Create client credentials from server request
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @return null|CredentialsIdentityInterface 
      */
     private function fromHeaders($request): ?CredentialsIdentityInterface
@@ -55,7 +55,7 @@ trait CreatesClientCredentials
     /**
      * Get client secret from server request
      * 
-     * @param \Illuminate\Http\Request $request
+     * @param mixed $request
      * 
      * @return null|string 
      */
@@ -77,7 +77,7 @@ trait CreatesClientCredentials
     /**
      * Get client id from server request
      * 
-     * @param \Illuminate\Http\Request $request
+     * @param mixed $request
      * 
      * @return null|string 
      */

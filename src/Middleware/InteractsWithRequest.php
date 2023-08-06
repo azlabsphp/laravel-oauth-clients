@@ -10,7 +10,7 @@ trait InteractsWithRequest
     /**
      * Gets cookie value from the user provided name.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param mixed $request
      * @param string $name
      *
      * @return string|array
@@ -23,7 +23,7 @@ trait InteractsWithRequest
     /**
      * Get the request client IP address.
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @return mixed 
      */
     public function getRequestIp($request)
@@ -35,7 +35,7 @@ trait InteractsWithRequest
     /**
      * Get header value for request header name
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @param string $name 
      * @param mixed $default 
      * @return mixed 
@@ -49,7 +49,7 @@ trait InteractsWithRequest
     /**
      * Parse token from the authorization header.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param mixed $request
      * @param string                 $header
      * @param string                 $method
      *

@@ -14,7 +14,7 @@ trait CreatesJwtClientCredentials
     /**
      * Creates Jwt Token Credentials from request
      * 
-     * @param \Illuminate\Http\Request $request 
+     * @param mixed $request 
      * @param string $cookieName 
      * @return JwtTokenCredentials 
      * @throws InvalidTokenException 

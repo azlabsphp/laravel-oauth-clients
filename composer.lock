@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d534742b7fa9ee54045fe30a49192f4",
+    "content-hash": "9aae166a396e6c6023c0e07844f31700",
     "packages": [
         {
             "name": "brick/math",
@@ -154,16 +154,16 @@
         },
         {
             "name": "drewlabs/contracts",
-            "version": "v0.2.31",
+            "version": "v0.2.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/drewlabs-contracts.git",
-                "reference": "b3b8a7edabab930ebda35954f4e604f3a7e0d760"
+                "reference": "c48496f84454953e5583aca0812ee1a50e33caa3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/drewlabs-contracts/zipball/b3b8a7edabab930ebda35954f4e604f3a7e0d760",
-                "reference": "b3b8a7edabab930ebda35954f4e604f3a7e0d760",
+                "url": "https://api.github.com/repos/azlabsphp/drewlabs-contracts/zipball/c48496f84454953e5583aca0812ee1a50e33caa3",
+                "reference": "c48496f84454953e5583aca0812ee1a50e33caa3",
                 "shasum": ""
             },
             "require": {
@@ -190,9 +190,9 @@
             "description": "Repository for libraries interfaces",
             "support": {
                 "issues": "https://github.com/azlabsphp/drewlabs-contracts/issues",
-                "source": "https://github.com/azlabsphp/drewlabs-contracts/tree/v0.2.31"
+                "source": "https://github.com/azlabsphp/drewlabs-contracts/tree/v0.2.32"
             },
-            "time": "2023-08-03T12:35:23+00:00"
+            "time": "2023-08-04T15:02:56+00:00"
         },
         {
             "name": "drewlabs/core-helpers",
@@ -250,16 +250,16 @@
         },
         {
             "name": "drewlabs/oauth-clients",
-            "version": "v0.2.13",
+            "version": "v0.2.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/oauth-clients.git",
-                "reference": "3278670bb607670138090f7fb94b9df7c5aafd52"
+                "reference": "2a07d5a5d049687dd04735bf7c38d49738abfa83"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/oauth-clients/zipball/3278670bb607670138090f7fb94b9df7c5aafd52",
-                "reference": "3278670bb607670138090f7fb94b9df7c5aafd52",
+                "url": "https://api.github.com/repos/azlabsphp/oauth-clients/zipball/2a07d5a5d049687dd04735bf7c38d49738abfa83",
+                "reference": "2a07d5a5d049687dd04735bf7c38d49738abfa83",
                 "shasum": ""
             },
             "require": {
@@ -294,9 +294,9 @@
             ],
             "support": {
                 "issues": "https://github.com/azlabsphp/oauth-clients/issues",
-                "source": "https://github.com/azlabsphp/oauth-clients/tree/v0.2.13"
+                "source": "https://github.com/azlabsphp/oauth-clients/tree/v0.2.15"
             },
-            "time": "2023-08-03T18:39:26+00:00"
+            "time": "2023-08-04T17:45:59+00:00"
         },
         {
             "name": "drewlabs/query-contracts",
@@ -3606,16 +3606,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.2.7",
+            "version": "10.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "a215d9ee8bac1733796e4ddff3306811f14414e5"
+                "reference": "d442ce7c4104d5683c12e67e4dcb5058159e9804"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a215d9ee8bac1733796e4ddff3306811f14414e5",
-                "reference": "a215d9ee8bac1733796e4ddff3306811f14414e5",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/d442ce7c4104d5683c12e67e4dcb5058159e9804",
+                "reference": "d442ce7c4104d5683c12e67e4dcb5058159e9804",
                 "shasum": ""
             },
             "require": {
@@ -3655,7 +3655,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "10.2-dev"
+                    "dev-main": "10.3-dev"
                 }
             },
             "autoload": {
@@ -3687,7 +3687,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.2.7"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.3.1"
             },
             "funding": [
                 {
@@ -3703,7 +3703,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-08-02T06:46:08+00:00"
+            "time": "2023-08-04T06:48:08+00:00"
         },
         {
             "name": "sebastian/cli-parser",

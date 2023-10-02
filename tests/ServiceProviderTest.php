@@ -2,7 +2,6 @@
 
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\Clients;
-use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialsPipelineFactory;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
 use Drewlabs\Laravel\Oauth\Clients\ServiceProvider;
@@ -19,6 +18,7 @@ use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
 use Illuminate\Container\Container;
 use PHPUnit\Framework\TestCase;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
 
 class ServiceProviderTest extends TestCase
 {

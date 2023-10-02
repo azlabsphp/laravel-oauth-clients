@@ -3,50 +3,51 @@
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
+use Drewlabs\Oauth\Clients\JwtAuthorizationHeaderCredentialsFactory;
+use Drewlabs\Oauth\Clients\JwtCookieCredentialsFactory;
 use InvalidArgumentException;
 
 class JwtAuthClients
 {
-
-    use CreatesJwtClientCredentials;
-
     /**
      * @var CredentialsIdentityValidator
      */
     private $validator;
-
+    
     /**
-     * @var string
+     * @var JwtAuthorizationHeaderCredentialsFactory
      */
-    private $cookieName;
+    private $jwtHeaderFactory;
 
     /**
-     * @var string
+     * 
+     * @var JwtCookieCredentialsFactory
      */
-    private $headerMethod;
+    private $jwtCookieFactory;
 
     /**
-     * @var string
+     * @var ServerRequest
      */
-    private $appKey;
+    private $serverRequest;
 
     /**
-     * Creates middlewate instance
+     * Creates class instance
      * 
      * @param CredentialsIdentityValidator $validator 
-     * @param string $appKey 
-     * @param string $headerMethod 
-     * @param string $cookieName 
-     * @return void 
      */
-    public function __construct(CredentialsIdentityValidator $validator, string $appKey, string $headerMethod = 'jwt', string $cookieName = 'jwt-cookie')
-    {
+    public function __construct(
+        ServerRequest $serverRequest,
+        CredentialsIdentityValidator $validator,
+        JwtAuthorizationHeaderCredentialsFactory $jwtHeaderFactory,
+        JwtCookieCredentialsFactory $jwtCookieFactory
+    ) {
         $this->validator = $validator;
-        $this->appKey = $appKey;
-        $this->headerMethod = $headerMethod;
-        $this->cookieName = $cookieName;
+        $this->jwtHeaderFactory = $jwtHeaderFactory;
+        $this->jwtCookieFactory = $jwtCookieFactory;
+        $this->serverRequest = $serverRequest;
     }
 
 
@@ -63,11 +64,11 @@ class JwtAuthClients
     public function handle($request, callable $next, ...$scopes)
     {
         // Get credentials from request cookies
-        $credentials = $this->jwtClientCredentialFromCookie($request, $this->appKey, $this->cookieName);
+        $credentials = $this->jwtCookieFactory->create($request);
 
         // Get credentials from header
         if (null === $credentials) {
-            $credentials = $this->jwtClientFromAuthorizationHeader($request, $this->appKey, $this->headerMethod);
+            $credentials = $this->jwtHeaderFactory->create($request);
         }
 
         if (null === $credentials) {
@@ -77,7 +78,7 @@ class JwtAuthClients
 
         try {
             // pass the server request through credentials validation layer
-            $this->validator->validate($credentials, $scopes, $this->getRequestIp($request));
+            $this->validator->validate($credentials, $scopes, $this->serverRequest->getRequestIp($request));
             // next request
             return $next($request);
         } catch (\Throwable $e) {

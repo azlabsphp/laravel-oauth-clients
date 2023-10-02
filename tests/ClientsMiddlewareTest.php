@@ -1,12 +1,13 @@
 <?php
 
 use Drewlabs\Laravel\Oauth\Clients\Middleware\Clients;
-use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialsPipelineFactory;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
+use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -29,24 +30,18 @@ class ClientsMiddlewareTest extends TestCase
         $request = new Request($headers);
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn(null);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
         $pipelineFactory->method('create')
-            ->willReturn($callback);
+            ->willReturn(null);
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke')
             ->willReturn(new stdClass);
-        $middleware = new Clients($clientsValidator, $pipelineFactory);
+        $middleware = new Clients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
         // Act
         $middleware->handle($request, $next);
@@ -62,18 +57,13 @@ class ClientsMiddlewareTest extends TestCase
         $request = new Request($headers);
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
         $credentials = $this->createMock(CredentialsIdentityInterface::class);
-        /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn($credentials);
+
         /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
         $pipelineFactory->method('create')
-            ->willReturn($callback);
+            ->willReturn($credentials);
         /**
          * @var Callback&MockObject
          */
@@ -81,7 +71,7 @@ class ClientsMiddlewareTest extends TestCase
         $next->expects($this->once())
             ->method('__invoke')
             ->willReturn($result = new stdClass);
-        $middleware = new Clients($clientsValidator, $pipelineFactory);
+        $middleware = new Clients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
         // Act
         $response = $middleware->handle($request, $next);
@@ -101,12 +91,6 @@ class ClientsMiddlewareTest extends TestCase
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
         $credentials = $this->createMock(CredentialsIdentityInterface::class);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn($credentials);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
@@ -115,13 +99,13 @@ class ClientsMiddlewareTest extends TestCase
         $pipelineFactory->expects($this->once())
             ->method('create')
             ->with($request)
-            ->willReturn($callback);
+            ->willReturn($credentials);
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke');
-        $middleware = new Clients($clientsValidator, $pipelineFactory);
+        $middleware = new Clients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
 
         // Act

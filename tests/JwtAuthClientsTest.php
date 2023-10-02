@@ -1,11 +1,14 @@
 <?php
 
 use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
+use Drewlabs\Oauth\Clients\JwtAuthorizationHeaderCredentialsFactory;
+use Drewlabs\Oauth\Clients\JwtCookieCredentialsFactory;
 use Drewlabs\Oauth\Clients\JwtTokenCredentials;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,7 +19,7 @@ class JwtAuthClientsTest extends TestCase
     {
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new JwtAuthClients($clientsValidator, 'AppKey');
+        $middleware = new JwtAuthClients(new ServerRequest, $clientsValidator, new JwtAuthorizationHeaderCredentialsFactory(new ServerRequest, 'AppKey'), new JwtCookieCredentialsFactory(new ServerRequest, 'AppKey'));
 
 
         $this->expectException(AuthorizationException::class);
@@ -51,7 +54,7 @@ class JwtAuthClientsTest extends TestCase
 
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new JwtAuthClients($clientsValidator, 'AppSecret');
+        $middleware = new JwtAuthClients(new ServerRequest, $clientsValidator, new JwtAuthorizationHeaderCredentialsFactory(new ServerRequest, 'AppSecret'), new JwtCookieCredentialsFactory(new ServerRequest, 'AppSecret'));
 
         // Mock request header function
         /**
@@ -80,7 +83,7 @@ class JwtAuthClientsTest extends TestCase
     {
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new JwtAuthClients($clientsValidator, 'AppKey');
+        $middleware = new JwtAuthClients(new ServerRequest, $clientsValidator, new JwtAuthorizationHeaderCredentialsFactory(new ServerRequest, 'AppKey'), new JwtCookieCredentialsFactory(new ServerRequest, 'AppKey'));
         $token = (string)((new JwtTokenCredentials('AppKey'))->withPayload('Client', 'Secret'));
         // Mock request header function
         /**
@@ -123,7 +126,7 @@ class JwtAuthClientsTest extends TestCase
     {
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new JwtAuthClients($clientsValidator, 'AppKey');
+        $middleware = new JwtAuthClients(new ServerRequest, $clientsValidator, new JwtAuthorizationHeaderCredentialsFactory(new ServerRequest, 'AppKey'), new JwtCookieCredentialsFactory(new ServerRequest, 'AppKey'));
         $token = (string)((new JwtTokenCredentials('AppKey'))->withPayload('Client', 'Secret'));
         // Mock request header function
         /**

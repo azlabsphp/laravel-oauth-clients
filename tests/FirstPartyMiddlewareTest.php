@@ -1,7 +1,7 @@
 <?php
 
 use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
-use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialsPipelineFactory;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
@@ -11,6 +11,7 @@ use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
 
 class FirstPartyMiddlewareTest extends TestCase
 {
@@ -30,24 +31,18 @@ class FirstPartyMiddlewareTest extends TestCase
         $request = new Request($headers);
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn(null);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
         $pipelineFactory->method('create')
-            ->willReturn($callback);
+            ->willReturn(null);
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke')
             ->willReturn(new stdClass);
-        $middleware = new FirstPartyClients($clientsValidator, $pipelineFactory);
+        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
         // Act
         $middleware->handle($request, $next);
@@ -78,17 +73,11 @@ class FirstPartyMiddlewareTest extends TestCase
         $clientsValidator->method('validate')
             ->willReturn($client);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn($credentials);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
         $pipelineFactory->method('create')
-            ->willReturn($callback);
+            ->willReturn($credentials);
         /**
          * @var Callback&MockObject
          */
@@ -96,7 +85,7 @@ class FirstPartyMiddlewareTest extends TestCase
         $next->expects($this->once())
             ->method('__invoke')
             ->willReturn($result = new stdClass);
-        $middleware = new FirstPartyClients($clientsValidator, $pipelineFactory);
+        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
         // Act
         $response = $middleware->handle($request, $next);
@@ -134,22 +123,16 @@ class FirstPartyMiddlewareTest extends TestCase
         $clientsValidator->method('validate')
             ->willReturn($client);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn($credentials);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
         $pipelineFactory->method('create')
-            ->willReturn($callback);
+            ->willReturn($credentials);
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
-        $middleware = new FirstPartyClients($clientsValidator, $pipelineFactory);
+        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
         // Act
         $middleware->handle($request, $next);
@@ -181,12 +164,6 @@ class FirstPartyMiddlewareTest extends TestCase
         $clientsValidator->method('validate')
             ->willReturn($client);
         /**
-         * @var Callback&MockObject
-         */
-        $callback = $this->createMock(Callback::class);
-        $callback->method('__invoke')
-            ->willReturn($credentials);
-        /**
          * @var CredentialsPipelineFactory&MockObject
          */
         $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
@@ -195,14 +172,14 @@ class FirstPartyMiddlewareTest extends TestCase
         $pipelineFactory->expects($this->once())
             ->method('create')
             ->with($request)
-            ->willReturn($callback);
+            ->willReturn($credentials);
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
         $next->expects($this->once())
             ->method('__invoke');
-        $middleware = new FirstPartyClients($clientsValidator, $pipelineFactory);
+        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
 
 
         // Act

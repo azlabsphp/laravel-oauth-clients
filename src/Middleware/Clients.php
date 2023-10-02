@@ -3,14 +3,14 @@
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
+use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use InvalidArgumentException;
 
 class Clients
 {
-    use InteractsWithRequest;
-
     /**
      * @var CredentialsIdentityValidator
      */
@@ -21,13 +21,23 @@ class Clients
     private $factory;
 
     /**
+     * @var ServerRequest
+     */
+    private $serverRequest;
+
+    /**
      * Create middleware class instance
      * 
+     * @param ServerRequest $serverRequest
      * @param CredentialsIdentityValidator $validator 
      * @param CredentialsPipelineFactory $factory 
      */
-    public function __construct(CredentialsIdentityValidator $validator, CredentialsPipelineFactory $factory)
-    {
+    public function __construct(
+        ServerRequest $serverRequest,
+        CredentialsIdentityValidator $validator,
+        CredentialsPipelineFactory $factory
+    ) {
+        $this->serverRequest = $serverRequest;
         $this->validator = $validator;
         $this->factory = $factory;
     }
@@ -45,9 +55,7 @@ class Clients
      */
     public function handle($request, callable $next, ...$scopes)
     {
-        $pipeline = $this->factory->create($request);
-        $credentials = call_user_func($pipeline, null);
-
+        $credentials = $this->factory->create($request);
         // throw an exception if the credentials is not found
         if (null === $credentials) {
             throw new AuthorizationException('authorization headers and cookies not found', 401);
@@ -55,7 +63,7 @@ class Clients
 
         // Validate throws an exception which might stop request execution flow
         try {
-            $this->validator->validate($credentials, $scopes, $this->getRequestIp($request));
+            $this->validator->validate($credentials, $scopes, $this->serverRequest->getRequestIp($request));
             // next request
             return $next($request);
         } catch (\Throwable $e) {

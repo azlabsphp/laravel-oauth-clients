@@ -1,9 +1,11 @@
 <?php
 
 use Drewlabs\Laravel\Oauth\Clients\Middleware\BasicAuthClients;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
+use Drewlabs\Oauth\Clients\BasicAuthorizationCredentialsFactory;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use PHPUnit\Framework\TestCase;
@@ -15,7 +17,7 @@ class BasicAuthClientsTest extends TestCase
     {
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients($clientsValidator);
+        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
 
 
         $this->expectException(AuthorizationException::class);
@@ -45,7 +47,7 @@ class BasicAuthClientsTest extends TestCase
 
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients($clientsValidator);
+        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
 
         // Mock request header function
         /**
@@ -70,7 +72,7 @@ class BasicAuthClientsTest extends TestCase
     {
         // Initialize
         $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients($clientsValidator);
+        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
         // Mock request header function
         /**
          * @var HeadersBag&MockObject

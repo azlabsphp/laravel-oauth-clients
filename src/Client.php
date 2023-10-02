@@ -12,7 +12,7 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     /**
      * @var AttributesAware
      */
-    private $model;
+    private $instance;
 
     /**
      * @var string|null
@@ -22,18 +22,33 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     /**
      * Create client instance
      * 
-     * @param AttributesAware $model 
+     * @param AttributesAware $instance 
      * @param string|null $plainTextSecret 
      */
-    public function __construct(AttributesAware $model, string $plainTextSecret = null)
+    public function __construct(AttributesAware $instance, string $plainTextSecret = null)
     {
-        $this->model = $model;
+        $this->instance = $instance;
         $this->plainTextSecret = $plainTextSecret;
+    }
+
+    public function isPasswordClient(): bool
+    {
+        return boolval($this->instance->getAttribute('password_client'));
+    }
+
+    public function isPersonalClient(): bool
+    {
+        return boolval($this->instance->getAttribute('personal_access_client'));
+    }
+
+    public function isConfidential(): bool
+    {
+        return !empty($this->instance->getAttribute('secret'));
     }
 
     public function getHashedSecret()
     {
-        return $this->model->getAttribute('secret');
+        return $this->instance->getAttribute('secret');
     }
 
     public function getPlainSecretAttribute()
@@ -43,37 +58,37 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
 
     public function getKey()
     {
-        return $this->model->getAttribute('id');
+        return $this->instance->getAttribute('id');
     }
 
     public function getName(): ?string
     {
-        return $this->model->getAttribute('name');
+        return $this->instance->getAttribute('name');
     }
 
     public function getUserId()
     {
-        return $this->model->getAttribute('user_id');
+        return $this->instance->getAttribute('user_id');
     }
 
     public function getIpAddressesAttribute()
     {
-        return $this->model->getAttribute('ip_addresses');
+        return $this->instance->getAttribute('ip_addresses');
     }
 
     public function firstParty()
     {
-        return boolval($this->model->getAttribute('personal_access_client')) || boolval($this->model->getAttribute('password_client'));
+        return boolval($this->instance->getAttribute('personal_access_client')) || boolval($this->instance->getAttribute('password_client'));
     }
 
     public function isRevoked()
     {
-        return boolval($this->model->getAttribute('revoked'));
+        return boolval($this->instance->getAttribute('revoked'));
     }
 
     public function getScopes(): array
     {
-        return (array)($this->model->getAttribute('scopes'));
+        return (array)($this->instance->getAttribute('scopes'));
     }
 
     public function hasScope($scope): bool
@@ -101,7 +116,7 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
 
     public function __toArray()
     {
-        $attributes = $this->model->toArray();
+        $attributes = $this->instance->toArray();
         $attributes['personal_access_client'] = boolval($attributes['personal_access_client'] ?? false);
         $attributes['password_client'] = boolval($attributes['password_client'] ?? false);
         $attributes['revoked'] = $this->isRevoked();

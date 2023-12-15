@@ -66,19 +66,21 @@ class ClientsRepository implements AbstractClientsRepository
         if (null !== $plainText) {
             $hashedSecret = $this->secretHasher->hashSecret($plainText);
         }
+        $ipAddresses = $attributes->getIpAddresses();
+        $scopes = $attributes->getScopes();
 
         $attributes = [
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
-            'ip_addresses' => $attributes->getIpAddresses(),
+            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? ['*']),
             'secret' => $hashedSecret,
             'redirect' => $attributes->getRedirectUrl(),
             'provider' => $attributes->getProvider(),
             'client_url' => $attributes->getAppUrl(),
-            'expires_on' => $attributes->getExpiresAt(),
+            'expires_on' => (null !== $expiresAt = $attributes->getExpiresAt()) ? $this->formatExpiresOn($expiresAt) : $expiresAt,
             'personal_access_client' => $attributes->isPersonalClient(),
             'password_client' => $attributes->isPasswordClient(),
-            'scopes' => $attributes->getScopes(),
+            'scopes' => is_array($scopes) ? implode(',', $scopes) : $scopes,
             'revoked' => $attributes->getRevoked(),
         ];
 
@@ -107,6 +109,8 @@ class ClientsRepository implements AbstractClientsRepository
         if (null === $plainText) {
             $plainText = $this->createSecret();
         }
+        $ipAddresses = $attributes->getIpAddresses();
+        $scopes = $attributes->getScopes();
         /**
          * @var Model
          */
@@ -114,15 +118,15 @@ class ClientsRepository implements AbstractClientsRepository
             'id' => $attributes->getId() ?? null,
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
-            'ip_addresses' => $attributes->getIpAddresses() ?? [],
+            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? ['*']),
             'secret' => $this->secretHasher->hashSecret($plainText),
             'redirect' => $attributes->getRedirectUrl(),
             'provider' => $attributes->getProvider() ?? 'local',
             'client_url' => $attributes->getAppUrl(),
-            'expires_on' => $attributes->getExpiresAt(),
+            'expires_on' => (null !== $expiresAt = $attributes->getExpiresAt()) ? $this->formatExpiresOn($expiresAt) : $expiresAt,
             'personal_access_client' => $attributes->isPersonalClient(),
             'password_client' => $attributes->isPasswordClient(),
-            'scopes' => $attributes->getScopes() ?? [],
+            'scopes' => is_array($scopes) ? implode(',', $scopes) : $scopes,
             'revoked' => boolval($attributes->getRevoked()),
         ]);
 
@@ -160,5 +164,16 @@ class ClientsRepository implements AbstractClientsRepository
         }
 
         return $key;
+    }
+
+    /**
+     *
+     * @param string|\DateTimeInterface|null $date
+     * @param string $format
+     * @return string
+     */
+    private function formatExpiresOn($date, $format = 'Y-m-d H:i:s')
+    {
+        return $date instanceof \DateTimeInterface ? $date->format($format) : (new \DateTimeImmutable())->setTimestamp(strtotime($date))->format($format);
     }
 }

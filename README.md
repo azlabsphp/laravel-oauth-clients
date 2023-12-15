@@ -52,7 +52,7 @@ To create a password client:
 
 To create a personnal access client:
 
-> php artisan drewlabs:oauth-clients:create <NAME> --personnal
+> php artisan drewlabs:oauth-clients:create <NAME> --personal
 
 **Note** Please use `php artisan drewlabs:oauth-clients:create --help` for more options
 

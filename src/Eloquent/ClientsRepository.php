@@ -5,6 +5,7 @@ namespace Drewlabs\Laravel\Oauth\Clients\Eloquent;
 use Drewlabs\Oauth\Clients\Contracts\ClientInterface;
 use Closure;
 use Drewlabs\Core\Helpers\Rand;
+use Drewlabs\Core\Helpers\UUID;
 use Drewlabs\Laravel\Oauth\Clients\Client;
 use Drewlabs\Oauth\Clients\Contracts\ClientsRepository as AbstractClientsRepository;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
@@ -80,7 +81,7 @@ class ClientsRepository implements AbstractClientsRepository
             'expires_on' => (null !== $expiresAt = $attributes->getExpiresAt()) ? $this->formatExpiresOn($expiresAt) : $expiresAt,
             'personal_access_client' => $attributes->isPersonalClient(),
             'password_client' => $attributes->isPasswordClient(),
-            'scopes' => is_array($scopes) ? implode(',', $scopes) : $scopes,
+            'scopes' => is_array($scopes) ? implode(',', $scopes) : ($scopes ?? []),
             'revoked' => $attributes->getRevoked(),
         ];
 
@@ -115,7 +116,7 @@ class ClientsRepository implements AbstractClientsRepository
          * @var Model
          */
         $client = $this->builder->create([
-            'id' => $attributes->getId() ?? null,
+            'id' => $attributes->getId() ?? UUID::ordered(),
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
             'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? '*'),
@@ -126,7 +127,7 @@ class ClientsRepository implements AbstractClientsRepository
             'expires_on' => (null !== $expiresAt = $attributes->getExpiresAt()) ? $this->formatExpiresOn($expiresAt) : $expiresAt,
             'personal_access_client' => $attributes->isPersonalClient(),
             'password_client' => $attributes->isPasswordClient(),
-            'scopes' => is_array($scopes) ? implode(',', $scopes) : $scopes,
+            'scopes' => is_array($scopes) ? implode(',', $scopes) : ($scopes ?? []),
             'revoked' => boolval($attributes->getRevoked()),
         ]);
 

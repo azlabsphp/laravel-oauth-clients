@@ -77,7 +77,7 @@ class CreateOauthClients extends Command
         $id = $this->option('id');
         $newClient = (new NewClient($id, $this->option('personal'), $this->option('password')))
             ->setName($this->argument('name'))
-            ->setIpAddresses(empty($ips) ? null : $ips)
+            ->setIpAddresses(empty($ips) ? ['*'] : $ips)
             ->setAppUrl($this->option('app_url'))
             ->setExpiresAt($this->option('expires_on'))
             ->setRevoked(false)
@@ -92,6 +92,6 @@ class CreateOauthClients extends Command
         $this->info(sprintf('Client ID: %s', $client->getKey()));
         $this->info(sprintf('Client Authorized Addresses: %s', Str::join($client->getIpAddressesAttribute(), ', ')));
         $this->info(sprintf('Client Secret: %s', $client->getPlainSecretAttribute()));
-        $this->info(sprintf('Client Credential Expiration Date: %s', $client->expires_on));
+        $this->info(sprintf('Client Credential Expiration Date: %s', $client->getExpiresAt()));
     }
 }

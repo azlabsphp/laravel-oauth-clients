@@ -4,6 +4,7 @@ namespace Drewlabs\Laravel\Oauth\Clients;
 
 use Drewlabs\Laravel\Oauth\Clients\Contracts\AttributesAware;
 use Drewlabs\Oauth\Clients\Contracts\PlainTextSecretAware;
+use Drewlabs\Oauth\Clients\Contracts\ScopeInterface;
 use JsonSerializable;
 use Drewlabs\Oauth\Clients\Contracts\SecretClientInterface;
 
@@ -78,7 +79,7 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
 
     public function firstParty()
     {
-        return boolval($this->instance->getAttribute('personal_access_client')) || boolval($this->instance->getAttribute('password_client'));
+        return $this->isPasswordClient() || $this->isPersonalClient();
     }
 
     public function isRevoked()
@@ -94,18 +95,22 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     public function hasScope($scope): bool
     {
         $clientScopes = $this->getScopes() ?? ['*'];
-
-        if (in_array('*', $clientScopes)) {
+        if (\in_array('*', $clientScopes, true)) {
             return true;
         }
-
         if (empty($scope)) {
             return true;
         }
+        if ($scope instanceof ScopeInterface) {
+            $scope = (string) $scope;
+        }
 
-        $scope = (string)$scope;
+        return !empty(array_intersect(\is_string($scope) ? [$scope] : $scope, $clientScopes ?? []));
+    }
 
-        return !empty(array_intersect(is_string($scope) ? [$scope] : $scope, $clientScopes ?? []));
+    public function getExpiresAt()
+    {
+        return $this->instance->getAttribute('expires_on');
     }
 
     #[\ReturnTypeWillChange]
@@ -127,5 +132,7 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
             $plainTextSecret = sprintf("%s***", uniqid());
         }
         $attributes['plain_secret'] = $plainTextSecret;
+        
+        return $attributes;
     }
 }

@@ -13,7 +13,7 @@ class CreateAuthorizedClientsTable extends Migration
      */
     public function up()
     {
-        Schema::create('server_authorized_clients', function (Blueprint $table) {
+        Schema::create('oauth_clients', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->unsignedBigInteger('user_id')->index()->nullable();
             $table->string('name')->nullable();

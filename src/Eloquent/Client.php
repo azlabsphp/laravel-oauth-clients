@@ -67,4 +67,15 @@ class Client extends Model implements Queryable, AttributesAware
     {
         return $this->relation_methods ?? [];
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::saving(function(self $model) {
+            $ip_addresses = $model->getAttributeFromArray('ip_addresses');
+            if ($ip_addresses === '*' || is_null($ip_addresses)) {
+                $model->ip_addresses = ['*'];
+            }
+        });
+    }
 }

@@ -72,7 +72,7 @@ class ClientsRepository implements AbstractClientsRepository
         $attributes = [
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
-            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? ['*']),
+            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? '*'),
             'secret' => $hashedSecret,
             'redirect' => $attributes->getRedirectUrl(),
             'provider' => $attributes->getProvider(),
@@ -118,7 +118,7 @@ class ClientsRepository implements AbstractClientsRepository
             'id' => $attributes->getId() ?? null,
             'name' => $attributes->getName(),
             'user_id' => $attributes->getUserId(),
-            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? ['*']),
+            'ip_addresses' => is_array($ipAddresses) ? implode(',', $ipAddresses) : ($ipAddresses ?? '*'),
             'secret' => $this->secretHasher->hashSecret($plainText),
             'redirect' => $attributes->getRedirectUrl(),
             'provider' => $attributes->getProvider() ?? 'local',

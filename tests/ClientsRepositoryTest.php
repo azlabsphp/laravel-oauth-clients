@@ -161,6 +161,7 @@ class ClientsRepositoryTest extends TestCase
          */
         $attributeAware = $this->createMock(AttributesAware::class);
         $plainSecret = Rand::key(16);
+        $id = UUID::ordered();
 
         /**
          * @var HashesClientSecret&MockObject
@@ -179,10 +180,10 @@ class ClientsRepositoryTest extends TestCase
         $builder->expects($this->once())
             ->method('create')
             ->with([
-                'id' => null,
+                'id' => $id,
                 'name' => 'Test Client',
                 'user_id' => null,
-                'ip_addresses' => [],
+                'ip_addresses' => '*' ,
                 'secret' => $hashedKey,
                 'redirect' => null,
                 'provider' => 'local',
@@ -200,7 +201,7 @@ class ClientsRepositoryTest extends TestCase
         });
 
         // Act
-        $result = $repository->create((new NewClientFactory)->create(null, 'Test Client', null, false, false));
+        $result = $repository->create((new NewClientFactory)->create($id, 'Test Client', null, false, false));
 
         // Assert
         $this->assertInstanceOf(ClientInterface::class, $result);
@@ -266,7 +267,9 @@ class ClientsRepositoryTest extends TestCase
             ->with([
                 'secret' => $hashedSecret,
                 'name' => 'Test Client',
-                'revoked' => false
+                'revoked' => false,
+                'ip_addresses' => '*',
+                'scopes' => []
             ])
             ->willReturn($attributeAware);
 
@@ -311,7 +314,7 @@ class ClientsRepositoryTest extends TestCase
         // Assert
         $builder->expects($this->once())
             ->method('update')
-            ->with(['name' => 'Test Client', 'revoked' => false])
+            ->with(['name' => 'Test Client', 'revoked' => false, 'ip_addresses' => '*', 'scopes' => []])
             ->willReturn($attributeAware);
 
         // Assert
@@ -352,7 +355,7 @@ class ClientsRepositoryTest extends TestCase
 
         $builder
             ->method('update')
-            ->with(['name' => 'Test Client', 'revoked' => false]);
+            ->with(['name' => 'Test Client', 'revoked' => false, 'ip_addresses' => '*', 'scopes' => []]);
 
         $builder
             ->method('where')
@@ -393,7 +396,7 @@ class ClientsRepositoryTest extends TestCase
 
         $builder
             ->method('update')
-            ->with(['name' => 'Test Client', 'revoked' => false]);
+            ->with(['name' => 'Test Client', 'revoked' => false, 'ip_addresses' => '*', 'scopes' => []]);
 
         $builder
             ->method('where')

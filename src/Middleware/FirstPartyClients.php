@@ -72,6 +72,11 @@ final class FirstPartyClients
                 throw new AuthorizationException('Client does not have the required privileges');
             }
 
+            if ($request->attributes) {
+                // Added __X_REQUEST_CLIENT__ to request attributes
+                $request->attributes->add(['__X_REQUEST_CLIENT__' => $credentials]);
+            }
+
             // next request
             return $next($request);
         } catch (\Throwable $e) {

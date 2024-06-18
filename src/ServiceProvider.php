@@ -101,7 +101,8 @@ class ServiceProvider extends SupportServiceProvider
             $factories = [
                 $app[BasicAuthorizationCredentialsFactory::class],
                 $app[JwtAuthorizationHeaderCredentialsFactory::class],
-                $app[JwtCookieCredentialsFactory::class]
+                $app[JwtCookieCredentialsFactory::class],
+                $app[CustomHeadersCredentialsFactory::class],
             ];
             return new CredentialsPipelineFactory(...$factories);
         });

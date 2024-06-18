@@ -61,6 +61,10 @@ class BasicAuthClients
         try {
             // pass the server request through credentials validation layer
             $this->validator->validate($credentials, $scopes, $this->serverRequest->getRequestIp($request));
+            if ($request->attributes) {
+                // Added __X_REQUEST_CLIENT__ to request attributes
+                $request->attributes->add(['__X_REQUEST_CLIENT__' => $credentials]);
+            }
             // next request
             return $next($request);
         } catch (\Throwable $e) {

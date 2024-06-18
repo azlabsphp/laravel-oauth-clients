@@ -25,6 +25,9 @@ class Request
      */
     private $inputs = [];
 
+    /** @var RequestAttributes */
+    public $attributes;
+
     /**
      * Create class instance
      * 
@@ -38,6 +41,8 @@ class Request
         $this->headers = $headers;
         $this->cookies = $cookies;
         $this->inputs = $inputs ?? [];
+        $this->attributes = new RequestAttributes;
+
     }
 
     public function ips()

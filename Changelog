@@ -3,3 +3,7 @@
 ## v0.2.2 [2023-10-02]
 
 - Reviewed middleware implementations to use oauth clients factory implementations 
+
+## v0.3.0 [2024-06-18]
+
+- Added support for laravel version 11 and added support for drewlabs helpers and query-contracts libraries version 0.3.x

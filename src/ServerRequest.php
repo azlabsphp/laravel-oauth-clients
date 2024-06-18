@@ -22,9 +22,10 @@ class ServerRequest implements ServerRequestFacade
     {
         return $request->headers->get($name, $default);
     }
-
+    
     public function getRequestAttribute($request, string $name)
     {
+        return $request->attributes->get($name);
     }
 
     public function getAuthorizationHeader($request, ?string $method = null)

@@ -6,7 +6,6 @@ use Drewlabs\Laravel\Oauth\Clients\Console\Commands\CreateOauthClients;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository as EloquentClientsRepository;
-use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
 use Drewlabs\Oauth\Clients\Argon2iHashClientSecret;
 use Drewlabs\Oauth\Clients\BasicAuthorizationCredentialsFactory;
 use Drewlabs\Oauth\Clients\Contracts\ClientsRepository;

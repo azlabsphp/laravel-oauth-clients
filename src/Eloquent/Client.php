@@ -7,6 +7,8 @@ use Drewlabs\Laravel\Oauth\Clients\Traits\Client as TraitsClient;
 use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
 
+
+// TODO: replace AttributesAware implementation with oauth client version
 class Client extends Model implements Queryable, AttributesAware
 {
     use TraitsClient;

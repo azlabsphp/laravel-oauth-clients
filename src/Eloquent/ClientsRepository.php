@@ -156,7 +156,7 @@ class ClientsRepository implements AbstractClientsRepository
     private function createSecret()
     {
         if (is_int($this->keyLength)) {
-            return Rand::key($this->keyLength);
+            return str_replace('.', '', Rand::key($this->keyLength));
         }
         $key = call_user_func($this->keyLength);
 

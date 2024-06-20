@@ -2,20 +2,11 @@
 
 namespace Drewlabs\Laravel\Oauth\Clients\Contracts;
 
-interface AttributesAware
-{
-    /**
-     * Returns the value of `$name` attribute or property
-     * 
-     * @param string $name 
-     * @return mixed 
-     */
-    public function getAttribute(string $name);
+use Drewlabs\Oauth\Clients\Contracts\AttributesAware as AbstractAttributesAware;
 
-    /**
-     * Returns array representation of the current instance
-     * 
-     * @return array 
-     */
-    public function toArray();
+/**
+ * @deprecated please use `Drewlabs\Oauth\Clients\Contracts\AttributesAware` instead
+ */
+interface AttributesAware extends AbstractAttributesAware
+{
 }

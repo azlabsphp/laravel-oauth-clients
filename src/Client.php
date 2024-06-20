@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Laravel\Oauth\Clients;
 
-use Drewlabs\Laravel\Oauth\Clients\Contracts\AttributesAware;
+use Drewlabs\Oauth\Clients\Contracts\AttributesAware;
 use Drewlabs\Oauth\Clients\Contracts\PlainTextSecretAware;
 use Drewlabs\Oauth\Clients\Contracts\ScopeInterface;
 use JsonSerializable;

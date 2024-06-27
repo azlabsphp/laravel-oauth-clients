@@ -1,12 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients\Eloquent;
 
 use Drewlabs\Laravel\Oauth\Clients\Contracts\AttributesAware;
 use Drewlabs\Laravel\Oauth\Clients\Traits\Client as TraitsClient;
 use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
-
 
 // TODO: replace AttributesAware implementation with oauth client version
 class Client extends Model implements Queryable, AttributesAware
@@ -32,26 +42,26 @@ class Client extends Model implements Queryable, AttributesAware
         'password_client',
         'scopes',
         'revoked',
-        'api_key'
+        'api_key',
     ];
 
     /**
-     * Associated table name
+     * Associated table name.
      *
      * @var string
      */
     protected $table = 'oauth_clients';
 
     /**
-     * Associated table primary key
+     * Associated table primary key.
      *
      * @var string
      */
     protected $primaryKey = 'id';
 
     /**
-     * List of relation for the current instance
-     * 
+     * List of relation for the current instance.
+     *
      * @var array
      */
     private $relation_methods = [];
@@ -74,9 +84,9 @@ class Client extends Model implements Queryable, AttributesAware
     protected static function boot()
     {
         parent::boot();
-        static::saving(function(self $model) {
+        static::saving(static function (self $model) {
             $ip_addresses = $model->getAttributeFromArray('ip_addresses');
-            if ($ip_addresses === '*' || is_null($ip_addresses)) {
+            if ('*' === $ip_addresses || null === $ip_addresses) {
                 $model->ip_addresses = ['*'];
             }
         });

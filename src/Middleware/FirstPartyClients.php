@@ -1,22 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
-use Closure;
 use Drewlabs\Laravel\Oauth\Clients\Contracts\RequestClientsProvider;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
-use InvalidArgumentException;
 
 final class FirstPartyClients
 {
-
     /** @var RequestClientsProvider */
     private $clients;
 
     /**
-     * Create middleware class instance
-     * 
-     * @param RequestClientsProvider $clients 
+     * Create middleware class instance.
      */
     public function __construct(RequestClientsProvider $clients)
     {
@@ -24,19 +30,20 @@ final class FirstPartyClients
     }
 
     /**
-     * Handle an incoming request
-     * 
-     * @param mixed $request 
-     * @param Closure $next 
-     * @param mixed $scopes 
-     * @return mixed 
-     * @throws InvalidArgumentException 
-     * @throws AuthorizationException 
+     * Handle an incoming request.
+     *
+     * @param mixed    $request
+     * @param \Closure $next
+     *
+     * @throws \InvalidArgumentException
+     * @throws AuthorizationException
+     *
+     * @return mixed
      */
     public function handle($request, callable $next)
     {
         try {
-            if (is_null($client = $this->clients->getRequestClient($request))) {
+            if (null === ($client = $this->clients->getRequestClient($request))) {
                 throw new AuthorizationException('access client not found', 401);
             }
             // Case client does not have required privileges throw an authorization exception
@@ -49,6 +56,7 @@ final class FirstPartyClients
                 // Added __X_REQUEST_CLIENT__ to request attributes
                 $request->attributes->add(['__X_REQUEST_CLIENT__' => $client]);
             }
+
             // next request
             return $next($request);
         } catch (\Throwable $e) {

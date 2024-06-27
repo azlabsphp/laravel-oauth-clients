@@ -1,17 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients;
 
 use Drewlabs\Oauth\Clients\Contracts\ApiKeyAware;
 use Drewlabs\Oauth\Clients\Contracts\AttributesAware;
 use Drewlabs\Oauth\Clients\Contracts\PlainTextSecretAware;
 use Drewlabs\Oauth\Clients\Contracts\ScopeInterface;
-use JsonSerializable;
 use Drewlabs\Oauth\Clients\Contracts\SecretClientInterface;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use Drewlabs\Oauth\Clients\Exceptions\MissingScopesException;
 
-class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInterface, ApiKeyAware
+class Client implements PlainTextSecretAware, \JsonSerializable, SecretClientInterface, ApiKeyAware
 {
     /** @var AttributesAware */
     private $instance;
@@ -20,15 +30,29 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     private $plainTextSecret;
 
     /**
-     * Create client instance
-     * 
-     * @param AttributesAware $instance 
-     * @param string|null $plainTextSecret 
+     * Create client instance.
      */
     public function __construct(AttributesAware $instance, string $plainTextSecret = null)
     {
         $this->instance = $instance;
         $this->plainTextSecret = $plainTextSecret;
+    }
+
+    public function __toArray()
+    {
+        $attributes = $this->instance->toArray();
+        $attributes['personal_access_client'] = (bool) ($attributes['personal_access_client'] ?? false);
+        $attributes['password_client'] = (bool) ($attributes['password_client'] ?? false);
+        $attributes['revoked'] = $this->isRevoked();
+        $attributes['ip_addresses'] = $this->getIpAddressesAttribute();
+        $attributes['scopes'] = $this->getScopes();
+        $plainTextSecret = $this->plainTextSecret;
+        if (null === $plainTextSecret) {
+            $plainTextSecret = sprintf('%s***', uniqid());
+        }
+        $attributes['plain_secret'] = $plainTextSecret;
+
+        return $attributes;
     }
 
     public function getPlainTextSecret(): ?string
@@ -41,8 +65,7 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
         return $this->instance->getAttribute('ip_addresses');
     }
 
-
-    public function validate(array $scopes = [], ?string $ip = null): bool
+    public function validate(array $scopes = [], string $ip = null): bool
     {
 
         // Case the client is revoked, we throw an authorization exception
@@ -86,12 +109,12 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
 
     public function isPasswordClient(): bool
     {
-        return boolval($this->instance->getAttribute('password_client'));
+        return (bool) $this->instance->getAttribute('password_client');
     }
 
     public function isPersonalClient(): bool
     {
-        return boolval($this->instance->getAttribute('personal_access_client'));
+        return (bool) $this->instance->getAttribute('personal_access_client');
     }
 
     public function isConfidential(): bool
@@ -136,12 +159,12 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
 
     public function isRevoked()
     {
-        return boolval($this->instance->getAttribute('revoked'));
+        return (bool) $this->instance->getAttribute('revoked');
     }
 
     public function getScopes(): array
     {
-        return (array)($this->instance->getAttribute('scopes'));
+        return (array) $this->instance->getAttribute('scopes');
     }
 
     public function hasScope($scope): bool
@@ -169,22 +192,5 @@ class Client implements PlainTextSecretAware, JsonSerializable, SecretClientInte
     public function jsonSerialize()
     {
         return $this->__toArray();
-    }
-
-    public function __toArray()
-    {
-        $attributes = $this->instance->toArray();
-        $attributes['personal_access_client'] = boolval($attributes['personal_access_client'] ?? false);
-        $attributes['password_client'] = boolval($attributes['password_client'] ?? false);
-        $attributes['revoked'] = $this->isRevoked();
-        $attributes['ip_addresses'] = $this->getIpAddressesAttribute();
-        $attributes['scopes'] = $this->getScopes();
-        $plainTextSecret = $this->plainTextSecret;
-        if (null === $plainTextSecret) {
-            $plainTextSecret = sprintf("%s***", uniqid());
-        }
-        $attributes['plain_secret'] = $plainTextSecret;
-
-        return $attributes;
     }
 }

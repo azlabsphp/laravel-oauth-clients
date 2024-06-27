@@ -1,14 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients\Traits;
 
-use DateTimeImmutable;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Core\Helpers\UUID;
 
 trait Client
 {
-
     public function getName()
     {
         return $this->getAttribute('name');
@@ -27,6 +36,7 @@ trait Client
     public function getScopesAttribute()
     {
         $scopes = $this->getAttributeFromArray('scopes') ?? ['*'];
+
         return Str::isStr($scopes) ? Str::split($scopes, ',') : $scopes;
     }
 
@@ -59,7 +69,7 @@ trait Client
 
     public function setIpAddressesAttribute($value)
     {
-        $this->attributes['ip_addresses'] = is_array($value) ? Str::join($value, ',') : (null === $value ? '*' : $value);
+        $this->attributes['ip_addresses'] = \is_array($value) ? Str::join($value, ',') : (null === $value ? '*' : $value);
     }
 
     public function setClientIpAttribute($value)
@@ -69,7 +79,7 @@ trait Client
 
     public function getIpAddressesAttribute()
     {
-        return array_filter(Str::split($this->getAttributeFromArray('ip_addresses') ?? '*', ','), function ($current) {
+        return array_filter(Str::split($this->getAttributeFromArray('ip_addresses') ?? '*', ','), static function ($current) {
             return !empty($current);
         });
     }
@@ -95,13 +105,13 @@ trait Client
     }
 
     /**
-     * Checks is the client is a first party client
+     * Checks is the client is a first party client.
      *
      * @return bool
      */
     public function firstParty()
     {
-        return boolval($this->personal_access_client) || boolval($this->password_client);
+        return (bool) $this->personal_access_client || (bool) $this->password_client;
     }
 
     public function getSecretAttribute()
@@ -109,10 +119,9 @@ trait Client
         return $this->getAttributeFromArray('secret');
     }
 
-
     public function isRevoked()
     {
-        return boolval($this->getAttributeFromArray('revoked'));
+        return (bool) $this->getAttributeFromArray('revoked');
     }
 
     public function getScopes()
@@ -123,14 +132,15 @@ trait Client
     public function hasScope($scope)
     {
         $clientScopes = $this->getScopes() ?? ['*'];
-        if (in_array('*', $clientScopes)) {
+        if (\in_array('*', $clientScopes, true)) {
             return true;
         }
         if (empty($scope)) {
             return true;
         }
-        $scope = (string)$scope;
-        return !empty(array_intersect(is_string($scope) ? [$scope] : $scope, $clientScopes ?? []));
+        $scope = (string) $scope;
+
+        return !empty(array_intersect(\is_string($scope) ? [$scope] : $scope, $clientScopes ?? []));
     }
 
     /**
@@ -142,7 +152,7 @@ trait Client
     }
 
     /**
-     * @return array 
+     * @return array
      */
     public function getAppends()
     {
@@ -150,7 +160,7 @@ trait Client
     }
 
     /**
-     * @return array 
+     * @return array
      */
     public function getArrayableAppends()
     {
@@ -169,7 +179,7 @@ trait Client
     public static function boot()
     {
         parent::boot();
-        static::creating(function (self $model) {
+        static::creating(static function (self $model) {
             $schemaBuilder = $model->getConnection()->getSchemaBuilder();
             if (null === $model->{$model->getPrimaryKey()}) {
                 $model->{$model->getPrimaryKey()} = UUID::ordered();
@@ -182,14 +192,14 @@ trait Client
             }
             if ($schemaBuilder->hasColumn($model->getTable(), 'scopes')) {
                 $scopes = empty($value = $model->getAttributeFromArray('scopes')) ? [] : $value;
-                if (is_array($scopes)) {
+                if (\is_array($scopes)) {
                     $model->scopes = Str::join($model->scopes, ',');
                 }
             }
             $model->cleanupAttributes();
         });
 
-        static::updating(function (self $model) {
+        static::updating(static function (self $model) {
             $schemaBuilder = $model->getConnection()->getSchemaBuilder();
             if ($schemaBuilder->hasColumn($model->getTable(), 'ip_addresses')) {
                 $model->setIpAddressesAttribute($model->ip_addresses);
@@ -198,7 +208,7 @@ trait Client
                 $model->expires_on = static::formatExpiresOn($date, $model->getDateFormat());
             }
             if ($schemaBuilder->hasColumn($model->getTable(), 'scopes')) {
-                if (is_array($model->scopes)) {
+                if (\is_array($model->scopes)) {
                     $model->scopes = Str::join($model->scopes, ',');
                 }
             }
@@ -207,14 +217,14 @@ trait Client
     }
 
     /**
-     *
      * @param string|\DateTimeInterface|null $date
-     * @param string $format
+     * @param string                         $format
+     *
      * @return string
      */
     private static function formatExpiresOn($date, $format = 'Y-m-d H:i:s')
     {
-        return $date instanceof \DateTimeInterface ? $date->format($format) : (new DateTimeImmutable())->setTimestamp(strtotime($date))->format($format);
+        return $date instanceof \DateTimeInterface ? $date->format($format) : (new \DateTimeImmutable())->setTimestamp(strtotime($date))->format($format);
     }
 
     private function cleanupAttributes()

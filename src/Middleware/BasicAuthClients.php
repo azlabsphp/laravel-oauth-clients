@@ -1,20 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
-use Closure;
 use Drewlabs\Laravel\Oauth\Clients\Contracts\RequestClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
-use InvalidArgumentException;
 
 class BasicAuthClients
 {
-        
     /** @var RequestClientsProvider */
     private $clients;
 
-    /**  @var ServerRequest */
+    /** @var ServerRequest */
     private $serverRequest;
 
     public function __construct(ServerRequest $serverRequest, RequestClientsProvider $clients)
@@ -23,21 +31,22 @@ class BasicAuthClients
         $this->clients = $clients;
     }
 
-
     /**
-     * Handle an incoming request
-     * 
-     * @param mixed $request 
-     * @param Closure $next 
-     * @param mixed $scopes 
-     * @return mixed 
-     * @throws InvalidArgumentException 
-     * @throws AuthorizationException 
+     * Handle an incoming request.
+     *
+     * @param mixed    $request
+     * @param \Closure $next
+     * @param mixed    $scopes
+     *
+     * @throws \InvalidArgumentException
+     * @throws AuthorizationException
+     *
+     * @return mixed
      */
     public function handle($request, callable $next, ...$scopes)
     {
         try {
-            if (is_null($client = $this->clients->getRequestClient($request))) {
+            if (null === ($client = $this->clients->getRequestClient($request))) {
                 throw new AuthorizationException('basic auth client not found', 401);
             }
             $client->validate($scopes, $this->serverRequest->getRequestIp($request));
@@ -46,6 +55,7 @@ class BasicAuthClients
                 // Added __X_REQUEST_CLIENT__ to request attributes
                 $request->attributes->add(['__X_REQUEST_CLIENT__' => $client]);
             }
+
             // next request
             return $next($request);
         } catch (\Throwable $e) {

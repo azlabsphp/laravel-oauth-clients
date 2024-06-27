@@ -1,33 +1,34 @@
 <?php
 
+declare(strict_types=1);
 
 /*
-|--------------------------------------------------------------------------
-| Authorized clients config
-|--------------------------------------------------------------------------
-|
-| Defines drewlabs/server-authorized-clients packages configurations
-|
-*/
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client;
 
 return [
     'clients' => [
         'model' => Client::class,
-        'hash' => true
+        'hash' => true,
     ],
 
     'credentials' => [
         'jwt' => [
             'cookie' => env('JWT_CREDENTIALS_COOKIE_NAME', 'jwt-cookie'),
             'header' => env('JWT_CREDENTIALS_HEADER_NAME', 'jwt'),
-            'key' => env('APP_KEY')
-        ]
+            'key' => env('APP_KEY'),
+        ],
     ],
 
     'secrets' => [
         'length' => env('CLIENT_SECRET_LENGHT', 32),
-        'prefix' => env('CLIENTS_API_KEY_PREFIX')
+        'prefix' => env('CLIENTS_API_KEY_PREFIX'),
     ],
 ];

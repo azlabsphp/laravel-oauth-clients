@@ -1,44 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Oauth\Clients\Console\Commands;
 
 use Drewlabs\Contracts\Support\Actions\Exceptions\InvalidActionException;
-use Drewlabs\Contracts\Validator\Validator;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Oauth\Clients\NewClient;
-use Drewlabs\ServerAuthorizedClient\AuthorizedClientsManager;
 use Illuminate\Console\Command;
 use InvalidArgumentException as GlobalInvalidArgumentException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use RuntimeException;
 use Symfony\Component\Console\Exception\LogicException;
 
 class CreateOauthClients extends Command
 {
-
     /**
      * @var string
      */
     protected $signature = 'drewlabs:oauth-clients:create '
-        . '{name : Name of the client to generate} '
-        . '{--id= : Client ID} '
-        . '{--secret= : Client Secret} '
-        . '{--ips=* : List of Ip Adress to authorize} '
-        . '{--app_url= : Client Hostname} '
-        . '{--expires_on= : Date Time format of when the Client authorization credentials expires (YYYY-mm-dd H:i:s)} '
-        . '{--redirect= : Successful authentication redirect path} '
-        . '{--scopes=* : List of scopes that the client id is restrict to} '
-        . '{--password : Creates a password authentication client}'
-        . '{--personal : Creates a first party authentication client}'
-        . '{--provider= : Token Provider Name} ';
+        .'{name : Name of the client to generate} '
+        .'{--id= : Client ID} '
+        .'{--secret= : Client Secret} '
+        .'{--ips=* : List of Ip Adress to authorize} '
+        .'{--app_url= : Client Hostname} '
+        .'{--expires_on= : Date Time format of when the Client authorization credentials expires (YYYY-mm-dd H:i:s)} '
+        .'{--redirect= : Successful authentication redirect path} '
+        .'{--scopes=* : List of scopes that the client id is restrict to} '
+        .'{--password : Creates a password authentication client}'
+        .'{--personal : Creates a first party authentication client}'
+        .'{--provider= : Token Provider Name} ';
 
     /**
-     * 
      * @var string
      */
-    protected  $description = 'Command interface for add new authorized client to the list of authorized-clients';
-
+    protected $description = 'Command interface for add new authorized client to the list of authorized-clients';
 
     /**
      * @var ClientsRepository
@@ -46,13 +51,11 @@ class CreateOauthClients extends Command
     private $clientsRepository;
 
     /**
-     * Creates command instances
-     * 
-     * @param ClientsRepository $clientsRepository 
-     * 
-     * @throws GlobalInvalidArgumentException 
-     * @throws InvalidArgumentException 
-     * @throws LogicException 
+     * Creates command instances.
+     *
+     * @throws GlobalInvalidArgumentException
+     * @throws InvalidArgumentException
+     * @throws LogicException
      */
     public function __construct(ClientsRepository $clientsRepository)
     {
@@ -61,14 +64,13 @@ class CreateOauthClients extends Command
     }
 
     /**
-     * Execute command logic
-     * 
-     * @param AuthorizedClientsManager $manager 
-     * @param Validator $validator 
-     * @return void 
-     * @throws InvalidArgumentException 
-     * @throws InvalidActionException 
-     * @throws RuntimeException 
+     * Execute command logic.
+     *
+     * @throws InvalidArgumentException
+     * @throws InvalidActionException
+     * @throws \RuntimeException
+     *
+     * @return void
      */
     public function handle()
     {

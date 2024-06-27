@@ -160,21 +160,17 @@ class ClientsRepositoryTest extends TestCase
          * @var AttributesAware&MockObject
          */
         $attributeAware = $this->createMock(AttributesAware::class);
-        $plainSecret = Rand::key(16);
+        $plainText = Rand::key(16);
         $id = UUID::ordered();
 
-        /**
-         * @var HashesClientSecret&MockObject
-         */
+        /** @var HashesClientSecret&MockObject*/
         $hashSecret = $this->createMock(HashesClientSecret::class);
 
         $hashSecret->expects($this->once())
             ->method('hashSecret')
             ->willReturn($hashedKey = Rand::key(16));
 
-        /**
-         * @var Builder&MockObject
-         */
+        /** @var Builder&MockObject */
         $builder  = $this->createMock(Builder::class);
 
         $builder->expects($this->once())
@@ -192,12 +188,13 @@ class ClientsRepositoryTest extends TestCase
                 'personal_access_client' => false,
                 'password_client' => false,
                 'scopes' => [],
-                'revoked' => false
+                'revoked' => false,
+                'api_key' => $plainText
             ])
             ->willReturn($attributeAware);
 
-        $repository = new ClientsRepository($builder, $hashSecret, function () use ($plainSecret) {
-            return $plainSecret;
+        $repository = new ClientsRepository($builder, $hashSecret, function () use ($plainText) {
+            return $plainText;
         });
 
         // Act
@@ -205,7 +202,7 @@ class ClientsRepositoryTest extends TestCase
 
         // Assert
         $this->assertInstanceOf(ClientInterface::class, $result);
-        $this->assertEquals($plainSecret, $result->getPlainSecretAttribute());
+        $this->assertEquals($plainText, $result->getPlainTextSecret());
     }
 
     public function test_client_repository_create_call_builder_create_method_and_return_client_interface_instance()
@@ -269,7 +266,8 @@ class ClientsRepositoryTest extends TestCase
                 'name' => 'Test Client',
                 'revoked' => false,
                 'ip_addresses' => '*',
-                'scopes' => []
+                'scopes' => [],
+                'api_key' => $plainSecret
             ])
             ->willReturn($attributeAware);
 

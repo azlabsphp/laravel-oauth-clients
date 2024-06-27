@@ -1,26 +1,76 @@
 <?php
 
+use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
-use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
 use Drewlabs\Oauth\Clients\Contracts\ClientInterface;
+use Drewlabs\Oauth\Clients\Contracts\CredentialsFactoryInterface;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
+use Drewlabs\Oauth\Clients\Contracts\SecretClientInterface;
+use Drewlabs\Oauth\Clients\Contracts\Validatable;
+use Drewlabs\Oauth\Clients\CredentialsFactory;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
+use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
 
 class FirstPartyMiddlewareTest extends TestCase
 {
+
+
+    private function createClientsMiddleware(ClientsRepository $repository = null, CredentialsFactoryInterface $factory = null, ClientInterface $client = null)
+    {
+        if (is_null($client)) {
+            $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
+            $client->method('getHashedSecret')
+                ->willReturn('Secret');
+            $client->method('getKey')
+                ->willReturn('Client');
+
+            $client->method('validate')
+                ->willReturn(true);
+        }
+        if (is_null($repository)) {
+
+            /** @var ClientsRepository&MockObject */
+            $repository = $this->createMock(ClientsRepository::class);
+            $repository->method('findById')
+                ->willReturnCallback(function ($property) use ($client) {
+                    if ($property === 'MyClientId') {
+                        return $client;
+                    }
+                    return null;
+                });
+
+            $repository->method('findByApiKey')
+                ->willReturnCallback(function ($property) use ($client) {
+                    if ($property === 'MyToken') {
+                        return $client;
+                    }
+                    return null;
+                });
+        }
+        if (is_null($factory)) {
+            $factory = $this->createMock(CredentialsFactoryInterface::class);
+            $factory->method('create')
+                ->willReturn(null);
+        }
+        $clientsProvider = new CredentialClientsProvider(
+            $factory,
+            new VerifyPlainTextSecretEngine,
+            $repository,
+        );
+        return new FirstPartyClients($clientsProvider);
+    }
 
     public function test_first_party_clients_middleware_throws_an_authorization_exception_case_credentials_pipeline_factory_returns_a_pipeline_that_returns_null_as_credentials()
     {
         // Assert
         $this->expectException(AuthorizationException::class);
-        $this->expectExceptionMessage('authorization headers and cookies not found');
+        $this->expectExceptionMessage('access client not found');
         $this->expectExceptionCode(401);
 
         // Initialize
@@ -29,20 +79,14 @@ class FirstPartyMiddlewareTest extends TestCase
          */
         $headers = $this->createMock(HeadersBag::class);
         $request = new Request($headers);
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        /**
-         * @var CredentialsPipelineFactory&MockObject
-         */
-        $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
-        $pipelineFactory->method('create')
-            ->willReturn(null);
+
         /**
          * @var Callback&MockObject
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke')
             ->willReturn(new stdClass);
-        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
+        $middleware = $this->createClientsMiddleware();
 
         // Act
         $middleware->handle($request, $next);
@@ -56,28 +100,31 @@ class FirstPartyMiddlewareTest extends TestCase
          */
         $headers = $this->createMock(HeadersBag::class);
         $request = new Request($headers);
-        /**
-         * @var MockObject&CredentialsIdentityInterface
-         */
+
         $credentials = $this->createMock(CredentialsIdentityInterface::class);
-        /**
-         * @var MockObject&ClientInterface
-         */
-        $client = $this->createMock(ClientInterface::class);
+        $credentials->method('getId')
+            ->willReturn('MyClientId');
+        $credentials->method('getSecret')
+            ->willReturn('Secret');
+
+        /** @var CredentialsFactory&MockObject */
+        $factory = $this->createMock(CredentialsFactory::class);
+        $factory->method('create')
+            ->willReturn($credentials);
+
+        /** @var MockObject&ClientInterface */
+        $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
+        $client->method('getHashedSecret')
+            ->willReturn('Secret');
+        $client->method('getKey')
+            ->willReturn('Client');
+
+        $client->method('validate')
+            ->willReturn(true);
+
         $client->method('firstParty')
             ->willReturn(true);
-        /**
-         * @var CredentialsIdentityValidator&MockObject
-         */
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $clientsValidator->method('validate')
-            ->willReturn($client);
-        /**
-         * @var CredentialsPipelineFactory&MockObject
-         */
-        $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
-        $pipelineFactory->method('create')
-            ->willReturn($credentials);
+
         /**
          * @var Callback&MockObject
          */
@@ -85,7 +132,7 @@ class FirstPartyMiddlewareTest extends TestCase
         $next->expects($this->once())
             ->method('__invoke')
             ->willReturn($result = new stdClass);
-        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
+        $middleware = $this->createClientsMiddleware(null, $factory, $client);
 
         // Act
         $response = $middleware->handle($request, $next);
@@ -98,91 +145,41 @@ class FirstPartyMiddlewareTest extends TestCase
     {
         // Assert
         $this->expectException(AuthorizationException::class);
-        $this->expectExceptionMessage('Client does not have the required privileges');
+        $this->expectExceptionMessage('client does not have the required privileges');
         $this->expectExceptionCode(401);
+
         // Initialize
-        /**
-         * @var HeadersBag&MockObject
-         */
+        /** @var HeadersBag&MockObject */
         $headers = $this->createMock(HeadersBag::class);
         $request = new Request($headers);
-        /**
-         * @var MockObject&CredentialsIdentityInterface
-         */
+       
         $credentials = $this->createMock(CredentialsIdentityInterface::class);
-        /**
-         * @var MockObject&ClientInterface
-         */
-        $client = $this->createMock(ClientInterface::class);
+        $credentials->method('getId')
+            ->willReturn('MyClientId');
+        $credentials->method('getSecret')
+            ->willReturn('Secret');
+
+        /** @var CredentialsFactory&MockObject */
+        $factory = $this->createMock(CredentialsFactory::class);
+        $factory->method('create')
+            ->willReturn($credentials);
+
+        /** @var MockObject&ClientInterface */
+        $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
+        $client->method('getHashedSecret')
+            ->willReturn('Secret');
+        $client->method('getKey')
+            ->willReturn('Client');
+
+        $client->method('validate')
+            ->willReturn(true);
+
         $client->method('firstParty')
             ->willReturn(false);
-        /**
-         * @var CredentialsIdentityValidator&MockObject
-         */
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $clientsValidator->method('validate')
-            ->willReturn($client);
-        /**
-         * @var CredentialsPipelineFactory&MockObject
-         */
-        $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
-        $pipelineFactory->method('create')
-            ->willReturn($credentials);
-        /**
-         * @var Callback&MockObject
-         */
-        $next = $this->createMock(Callback::class);
-        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
+    
+        $middleware = $this->createClientsMiddleware(null, $factory, $client);
 
         // Act
-        $middleware->handle($request, $next);
-
-    }
-
-    public function test_first_party_clients_middleware_calls_credentials_pipeline_create_method_only_once_with_request_object()
-    {
-        // Initialize
-        /**
-         * @var HeadersBag&MockObject
-         */
-        $headers = $this->createMock(HeadersBag::class);
-        $request = new Request($headers);
-        /**
-         * @var MockObject&CredentialsIdentityInterface
-         */
-        $credentials = $this->createMock(CredentialsIdentityInterface::class);
-        /**
-         * @var MockObject&ClientInterface
-         */
-        $client = $this->createMock(ClientInterface::class);
-        $client->method('firstParty')
-            ->willReturn(true);
-        /**
-         * @var CredentialsIdentityValidator&MockObject
-         */
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $clientsValidator->method('validate')
-            ->willReturn($client);
-        /**
-         * @var CredentialsPipelineFactory&MockObject
-         */
-        $pipelineFactory = $this->createMock(CredentialsPipelineFactory::class);
-
-        // Assert
-        $pipelineFactory->expects($this->once())
-            ->method('create')
-            ->with($request)
-            ->willReturn($credentials);
-        /**
-         * @var Callback&MockObject
-         */
-        $next = $this->createMock(Callback::class);
-        $next->expects($this->once())
-            ->method('__invoke');
-        $middleware = new FirstPartyClients(new ServerRequest, $clientsValidator, $pipelineFactory);
-
-
-        // Act
-        $middleware->handle($request, $next);
+        $middleware->handle($request, $this->createMock(Callback::class));
     }
 }

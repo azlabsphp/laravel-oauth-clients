@@ -27,6 +27,7 @@ return [
     ],
 
     'secrets' => [
-        'length' => env('CLIENT_SECRET_LENGHT', 32)
+        'length' => env('CLIENT_SECRET_LENGHT', 32),
+        'prefix' => env('CLIENTS_API_KEY_PREFIX')
     ],
 ];

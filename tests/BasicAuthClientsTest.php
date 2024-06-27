@@ -1,27 +1,51 @@
 <?php
 
+use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\BasicAuthClients;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\HeadersBag;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Callback;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Request;
 use Drewlabs\Oauth\Clients\BasicAuthorizationCredentialsFactory;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
+use Drewlabs\Oauth\Clients\Contracts\SecretClientInterface;
+use Drewlabs\Oauth\Clients\Contracts\Validatable;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
+use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
+use PHPUnit\Framework\InvalidArgumentException;
+use PHPUnit\Framework\MockObject\Exception;
+use PHPUnit\Event\NoPreviousThrowableException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class BasicAuthClientsTest extends TestCase
 {
+
+    /**
+     * @return BasicAuthClients 
+     * @throws InvalidArgumentException 
+     * @throws Exception 
+     * @throws NoPreviousThrowableException 
+     */
+    private function createBasicAuthMiddleware($repository = null, $secretVerifier = null)
+    {
+        $serverRequest = new ServerRequest;
+        $clientsProvider = new CredentialClientsProvider(
+            new BasicAuthorizationCredentialsFactory($serverRequest),
+            new VerifyPlainTextSecretEngine,
+            $repository ?? $this->createMock(ClientsRepository::class),
+        );
+        return new BasicAuthClients($serverRequest, $clientsProvider);
+    }
+
     public function test_basic_auth_clients_throws_authorization_exception_case_request_does_not_have_basic_auth_header()
     {
         // Initialize
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
+        $middleware = $this->createBasicAuthMiddleware();
 
 
         $this->expectException(AuthorizationException::class);
-        $this->expectExceptionMessage('basic auth string not found');
+        $this->expectExceptionMessage('basic auth client not found');
 
         // Mock request header function
         /**
@@ -43,11 +67,10 @@ class BasicAuthClientsTest extends TestCase
     public function test_basic_auth_clients_throws_authorization_exception_case_request_has_incorrect_basic_authorization_header()
     {
         $this->expectException(AuthorizationException::class);
-        $this->expectExceptionMessage('basic auth string not found');
+        $this->expectExceptionMessage('basic auth client not found');
 
         // Initialize
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
+        $middleware = $this->createBasicAuthMiddleware();
 
         // Mock request header function
         /**
@@ -68,20 +91,32 @@ class BasicAuthClientsTest extends TestCase
         $middleware->handle($request, $next);
     }
 
-    public function test_basic_auth_client_call_next_function_with_request_instance_case_base_64_credentials_is_resolved()
+    public function test_basic_auth_client_call_next_function_with_request_instance_case_base_64_credentials_is_provided_and_repository_returns_a_client_instance()
     {
         // Initialize
-        $clientsValidator = $this->createMock(CredentialsIdentityValidator::class);
-        $middleware = new BasicAuthClients(new ServerRequest, $clientsValidator, new BasicAuthorizationCredentialsFactory(new ServerRequest));
+        $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
+        $client->method('getHashedSecret')
+            ->willReturn('Secret');
+        $client->method('getKey')
+            ->willReturn('Client');
+
+        $client->method('validate')
+            ->willReturn(true);
+
+        /** @var ClientsRepository&MockObject */
+        $repository = $this->createMock(ClientsRepository::class);
+        $repository->method('findById')
+            ->willReturn($client);
+
+        $middleware = $this->createBasicAuthMiddleware($repository);
+
         // Mock request header function
         /**
          * @var HeadersBag&MockObject
          */
         $headers = $this->createMock(HeadersBag::class);
         $request = new Request($headers);
-        /**
-         * @var Callback&MockObject
-         */
+        /** @var Callback&MockObject */
         $next = $this->createMock(Callback::class);
 
         $headers

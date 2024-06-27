@@ -7,6 +7,9 @@ use Drewlabs\Oauth\Clients\Contracts\ClientProviderInterface;
 use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityInterface;
 use Drewlabs\Oauth\Clients\Contracts\VerifyClientSecretInterface;
 
+/**
+ * @deprecated
+ */
 class ClientsProvider implements ClientProviderInterface
 {
     /**

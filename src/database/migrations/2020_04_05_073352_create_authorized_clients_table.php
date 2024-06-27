@@ -27,6 +27,7 @@ class CreateAuthorizedClientsTable extends Migration
             $table->boolean('password_client')->default(false);
             $table->boolean('revoked')->default(false);
             $table->text('scopes')->nullable();
+            $table->string('api_key', 45)->nullable();
             $table->timestamps();
         });
     }

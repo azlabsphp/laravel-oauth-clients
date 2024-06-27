@@ -3,51 +3,24 @@
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
+use Drewlabs\Laravel\Oauth\Clients\Contracts\RequestClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
-use Drewlabs\Oauth\Clients\JwtAuthorizationHeaderCredentialsFactory;
-use Drewlabs\Oauth\Clients\JwtCookieCredentialsFactory;
 use InvalidArgumentException;
 
 class JwtAuthClients
 {
-    /**
-     * @var CredentialsIdentityValidator
-     */
-    private $validator;
+    
+    /** @var RequestClientsProvider */
+    private $clients;
 
-    /**
-     * @var JwtAuthorizationHeaderCredentialsFactory
-     */
-    private $jwtHeaderFactory;
-
-    /**
-     * 
-     * @var JwtCookieCredentialsFactory
-     */
-    private $jwtCookieFactory;
-
-    /**
-     * @var ServerRequest
-     */
+    /**  @var ServerRequest */
     private $serverRequest;
 
-    /**
-     * Creates class instance
-     * 
-     * @param CredentialsIdentityValidator $validator 
-     */
-    public function __construct(
-        ServerRequest $serverRequest,
-        CredentialsIdentityValidator $validator,
-        JwtAuthorizationHeaderCredentialsFactory $jwtHeaderFactory,
-        JwtCookieCredentialsFactory $jwtCookieFactory
-    ) {
-        $this->validator = $validator;
-        $this->jwtHeaderFactory = $jwtHeaderFactory;
-        $this->jwtCookieFactory = $jwtCookieFactory;
+    public function __construct(ServerRequest $serverRequest, RequestClientsProvider $clients)
+    {
         $this->serverRequest = $serverRequest;
+        $this->clients = $clients;
     }
 
 
@@ -63,28 +36,17 @@ class JwtAuthClients
      */
     public function handle($request, callable $next, ...$scopes)
     {
-        // Get credentials from request cookies
-        $credentials = $this->jwtCookieFactory->create($request);
-
-        // Get credentials from header
-        if (null === $credentials) {
-            $credentials = $this->jwtHeaderFactory->create($request);
-        }
-
-        if (null === $credentials) {
-            // throw not found exception if base64 is null or false
-            throw new AuthorizationException('jwt auth string not found', 401);
-        }
-
         try {
+            $client = $this->clients->getRequestClient($request);
+            if (is_null($client)) {
+                throw new AuthorizationException('jwt auth client not found', 401);
+            }
+            $client->validate($scopes, $this->serverRequest->getRequestIp($request));
             // pass the server request through credentials validation layer
-            $this->validator->validate($credentials, $scopes, $this->serverRequest->getRequestIp($request));
-
             if ($request->attributes) {
                 // Added __X_REQUEST_CLIENT__ to request attributes
-                $request->attributes->add(['__X_REQUEST_CLIENT__' => $credentials]);
+                $request->attributes->add(['__X_REQUEST_CLIENT__' => $client]);
             }
-            
             // next request
             return $next($request);
         } catch (\Throwable $e) {

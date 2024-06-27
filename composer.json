@@ -29,7 +29,7 @@
     "require": {
         "php": "^8.0",
         "drewlabs/core-helpers": "^0.3.0",
-        "drewlabs/oauth-clients": "^0.2.0|^0.3.0",
+        "drewlabs/oauth-clients": "^0.2.0|^0.3.1",
         "drewlabs/query-contracts": "^0.3.0",
         "illuminate/console": "^9.0|^10.0|^11.0",
         "illuminate/database": "^9.0|^10.0|^11.0"

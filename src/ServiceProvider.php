@@ -4,16 +4,22 @@ namespace Drewlabs\Laravel\Oauth\Clients;
 
 use Drewlabs\Laravel\Oauth\Clients\Console\Commands\CreateOauthClients;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client;
-use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsProvider;
+use Drewlabs\Oauth\Clients\Contracts\ClientsRepository;
+use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository as AbstractClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository as EloquentClientsRepository;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\ApiKeyClients;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\ApiKeyClientsProvider;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\BasicAuthClients;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\Clients;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\ClientsProvider;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
 use Drewlabs\Oauth\Clients\Argon2iHashClientSecret;
 use Drewlabs\Oauth\Clients\BasicAuthorizationCredentialsFactory;
-use Drewlabs\Oauth\Clients\Contracts\ClientsRepository;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\VerifyClientSecretInterface;
-use Drewlabs\Oauth\Clients\CredentialsPipelineFactory;
-use Drewlabs\Oauth\Clients\CredentialsValidator;
+use Drewlabs\Oauth\Clients\CredentialsFactory;
 use Drewlabs\Oauth\Clients\CustomHeadersCredentialsFactory;
 use Drewlabs\Oauth\Clients\JwtAuthorizationHeaderCredentialsFactory;
 use Drewlabs\Oauth\Clients\JwtCookieCredentialsFactory;
@@ -55,6 +61,7 @@ class ServiceProvider extends SupportServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/config/clients.php', 'clients');
 
         $this->app->bind(ClientsRepository::class, EloquentClientsRepository::class);
+        $this->app->bind(AbstractClientsRepository::class, EloquentClientsRepository::class);
 
         $this->app->bind(HashesClientSecret::class, function ($app) {
             $config = $app['config'];
@@ -71,11 +78,7 @@ class ServiceProvider extends SupportServiceProvider
         $this->app->bind(EloquentClientsRepository::class, function ($app) {
             $config = $app['config'];
             $model = $config->get('clients.clients.model') ?? Client::class;
-            return new EloquentClientsRepository(forward_static_call([$model, 'query']), $app[HashesClientSecret::class], $config->get('clients.secrets.length', 32) ?? 32);
-        });
-
-        $this->app->bind(CredentialsIdentityValidator::class, function ($app) {
-            return new CredentialsValidator($app[ClientsProvider::class]);
+            return new EloquentClientsRepository(forward_static_call([$model, 'query']), $app[HashesClientSecret::class], $config->get('clients.secrets.length', 32) ?? 32, $config->get('clients.secrets.prefix'));
         });
 
         $this->app->bind(BasicAuthorizationCredentialsFactory::class, function () {
@@ -96,14 +99,78 @@ class ServiceProvider extends SupportServiceProvider
             return new CustomHeadersCredentialsFactory(new ServerRequest);
         });
 
-        $this->app->bind(CredentialsPipelineFactory::class, function ($app) {
-            $factories = [
-                $app[BasicAuthorizationCredentialsFactory::class],
-                $app[JwtAuthorizationHeaderCredentialsFactory::class],
-                $app[JwtCookieCredentialsFactory::class],
-                $app[CustomHeadersCredentialsFactory::class],
-            ];
-            return new CredentialsPipelineFactory(...$factories);
+        $this->app->bind(ApiKeyClientsProvider::class, function ($app) {
+            return new ApiKeyClientsProvider(new ServerRequest, $app[AbstractClientsRepository::class]);
         });
+
+
+        $this->app->bind(BasicAuthClients::class, function ($app) {
+            $clientsProvider = new CredentialClientsProvider(
+                $app[BasicAuthorizationCredentialsFactory::class],
+                $app[VerifyClientSecretInterface::class],
+                $app[AbstractClientsRepository::class]
+            );
+            return new BasicAuthClients(new ServerRequest, $clientsProvider);
+        });
+
+        $this->app->bind(Clients::class, function ($app) {
+            return new Clients(new ServerRequest, $this->createComposedClientsProvider($app));
+        });
+
+        $this->app->bind(FirstPartyClients::class, function ($app) {
+            return new FirstPartyClients($this->createComposedClientsProvider($app));
+        });
+
+        $this->app->bind(JwtAuthClients::class, function ($app) {
+            return new JwtAuthClients(new ServerRequest, new CredentialClientsProvider(
+                new CredentialsFactory(
+                    $app[JwtAuthorizationHeaderCredentialsFactory::class],
+                    $app[JwtCookieCredentialsFactory::class],
+                ),
+                $app[VerifyClientSecretInterface::class],
+                $app[AbstractClientsRepository::class]
+
+            ));
+        });
+
+        $this->app->bind(ApiKeyClients::class, function ($app) {
+            $requestAdapter = new ServerRequest;
+            return new ApiKeyClients($requestAdapter, new ApiKeyClientsProvider($requestAdapter, $app[AbstractClientsRepository::class]));
+        });
+    }
+
+
+    /**
+     * Creates a credentials factory that combines multiple credential factories
+     * 
+     * @param mixed $app 
+     * @return CredentialsFactory 
+     */
+    private function createComposedCredentialsFactory($app)
+    {
+        return new CredentialsFactory(
+            $app[BasicAuthorizationCredentialsFactory::class],
+            $app[JwtAuthorizationHeaderCredentialsFactory::class],
+            $app[JwtCookieCredentialsFactory::class],
+            $app[CustomHeadersCredentialsFactory::class]
+        );
+    }
+
+    /**
+     * Creates a composed clients provider instance
+     * 
+     * @param mixed $app 
+     * @return ClientsProvider 
+     */
+    private function createComposedClientsProvider($app)
+    {
+        return new ClientsProvider(
+            $app[ApiKeyClientsProvider::class],
+            new CredentialClientsProvider(
+                $this->createComposedCredentialsFactory($app),
+                $app[VerifyClientSecretInterface::class],
+                $app[AbstractClientsRepository::class]
+            )
+        );
     }
 }

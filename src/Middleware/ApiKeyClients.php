@@ -4,24 +4,25 @@ namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
 use Drewlabs\Laravel\Oauth\Clients\Contracts\RequestClientsProvider;
+use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use InvalidArgumentException;
 
-final class FirstPartyClients
+class ApiKeyClients
 {
-
     /** @var RequestClientsProvider */
     private $clients;
 
-    /**
-     * Create middleware class instance
-     * 
-     * @param RequestClientsProvider $clients 
-     */
-    public function __construct(RequestClientsProvider $clients)
+    /**  @var ServerRequest */
+    private $serverRequest;
+
+
+    public function __construct(ServerRequest $serverRequest, RequestClientsProvider $clients)
     {
+        $this->serverRequest = $serverRequest;
         $this->clients = $clients;
     }
+
 
     /**
      * Handle an incoming request
@@ -33,17 +34,14 @@ final class FirstPartyClients
      * @throws InvalidArgumentException 
      * @throws AuthorizationException 
      */
-    public function handle($request, callable $next)
+    public function handle($request, callable $next, ...$scopes)
     {
         try {
-            if (is_null($client = $this->clients->getRequestClient($request))) {
+            $client = $this->clients->getRequestClient($request);
+            if (is_null($client)) {
                 throw new AuthorizationException('access client not found', 401);
             }
-            // Case client does not have required privileges throw an authorization exception
-            if (!$client->firstParty()) {
-                throw new AuthorizationException('client does not have the required privileges');
-            }
-
+            $client->validate($scopes, $this->serverRequest->getRequestIp($request));
             // pass the server request through credentials validation layer
             if ($request->attributes) {
                 // Added __X_REQUEST_CLIENT__ to request attributes
@@ -55,4 +53,5 @@ final class FirstPartyClients
             throw new AuthorizationException($e->getMessage(), 401);
         }
     }
+
 }

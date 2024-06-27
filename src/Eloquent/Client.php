@@ -32,6 +32,7 @@ class Client extends Model implements Queryable, AttributesAware
         'password_client',
         'scopes',
         'revoked',
+        'api_key'
     ];
 
     /**

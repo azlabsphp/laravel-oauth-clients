@@ -7,28 +7,27 @@ use Closure;
 use Drewlabs\Core\Helpers\Rand;
 use Drewlabs\Core\Helpers\UUID;
 use Drewlabs\Laravel\Oauth\Clients\Client;
-use Drewlabs\Oauth\Clients\Contracts\ClientsRepository as AbstractClientsRepository;
+use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository as AbstractClientsRepository;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\NewClientInterface;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\Client as Model;
+use Drewlabs\Oauth\Clients\Contracts\ApiKeyClientsRepository;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use RuntimeException;
 
 class ClientsRepository implements AbstractClientsRepository
 {
-    /**
-     * @var HashesClientSecret
-     */
+    /**  @var HashesClientSecret */
     private $secretHasher;
-    /**
-     * @var int|callable
-     */
+
+    /** @var int|callable */
     private $keyLength;
 
-    /**
-     * @var Builder
-     */
+    /** @var Builder */
     private $builder;
+
+    /** @var string */
+    private $apiKeyPrefix;
 
     /**
      * Creates repository instance
@@ -37,11 +36,20 @@ class ClientsRepository implements AbstractClientsRepository
      * @param HashesClientSecret $secretHasher 
      * @param int|callable $keyLength 
      */
-    public function __construct(Builder $builder, HashesClientSecret $secretHasher, $keyLength = 32)
+    public function __construct(Builder $builder, HashesClientSecret $secretHasher, $keyLength = 32, string $apiKeyPrefix = null)
     {
         $this->builder = $builder;
         $this->secretHasher = $secretHasher;
-        $this->keyLength = $keyLength ?? 32;
+        $this->apiKeyPrefix = $apiKeyPrefix ? $apiKeyPrefix : '';
+        $this->keyLength = is_int($keyLength) ? max($keyLength, 32) : ($keyLength ?? 32);
+    }
+
+    public function findByApiKey(string $key): ?ClientInterface
+    {
+
+        /** @var Model */
+        $client = $this->builder->where('api_key', $key)->first();
+        return null === $client ? null : new Client($client);
     }
 
     public function findByUserId($identifier): array
@@ -53,9 +61,7 @@ class ClientsRepository implements AbstractClientsRepository
 
     public function findById($id): ?ClientInterface
     {
-        /**
-         * @var Model
-         */
+        /** @var Model */
         $client = $this->builder->where('id', (string)$id)->first();
         return null === $client ? null : new Client($client);
     }
@@ -83,6 +89,7 @@ class ClientsRepository implements AbstractClientsRepository
             'password_client' => $attributes->isPasswordClient(),
             'scopes' => is_array($scopes) ? implode(',', $scopes) : ($scopes ?? []),
             'revoked' => $attributes->getRevoked(),
+            'api_key' => $plainText,
         ];
 
         // Remove null values from the attributes array
@@ -107,14 +114,11 @@ class ClientsRepository implements AbstractClientsRepository
     public function create(NewClientInterface $attributes, ?Closure $callback = null)
     {
         $plainText = $attributes->getSecret();
-        if (null === $plainText) {
-            $plainText = $this->createSecret();
-        }
+        $plainText = $plainText ?? $this->createSecret();
         $ipAddresses = $attributes->getIpAddresses();
         $scopes = $attributes->getScopes();
-        /**
-         * @var Model
-         */
+
+        /**  @var Model */
         $client = $this->builder->create([
             'id' => $attributes->getId() ?? UUID::ordered(),
             'name' => $attributes->getName(),
@@ -129,6 +133,7 @@ class ClientsRepository implements AbstractClientsRepository
             'password_client' => $attributes->isPasswordClient(),
             'scopes' => is_array($scopes) ? implode(',', $scopes) : ($scopes ?? []),
             'revoked' => boolval($attributes->getRevoked()),
+            'api_key' => $plainText,
         ]);
 
         $callback = $callback ?? function (ClientInterface $client) {
@@ -156,7 +161,8 @@ class ClientsRepository implements AbstractClientsRepository
     private function createSecret()
     {
         if (is_int($this->keyLength)) {
-            return str_replace('.', '', Rand::key($this->keyLength));
+            printf("Key lenght is int: %d", $this->keyLength);
+            return str_replace('.', '', sprintf("%s_%s", $this->apiKeyPrefix, base64_encode(bin2hex(random_bytes(intval($this->keyLength / 2))))));
         }
         $key = call_user_func($this->keyLength);
 

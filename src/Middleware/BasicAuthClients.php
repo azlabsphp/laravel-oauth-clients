@@ -3,43 +3,26 @@
 namespace Drewlabs\Laravel\Oauth\Clients\Middleware;
 
 use Closure;
+use Drewlabs\Laravel\Oauth\Clients\Contracts\RequestClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\ServerRequest;
-use Drewlabs\Oauth\Clients\BasicAuthorizationCredentialsFactory;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use InvalidArgumentException;
 
 class BasicAuthClients
 {
-    /**
-     * @var CredentialsIdentityValidator
-     */
-    private $validator;
+        
+    /** @var RequestClientsProvider */
+    private $clients;
 
-    /**
-     * @var BasicAuthorizationCredentialsFactory
-     */
-    private $factory;
-
-    /**
-     * @var ServerRequest
-     */
+    /**  @var ServerRequest */
     private $serverRequest;
 
-    /**
-     * Creates class instance
-     * 
-     * @param CredentialsIdentityValidator $validator 
-     */
-    public function __construct(
-        ServerRequest $serverRequest,
-        CredentialsIdentityValidator $validator,
-        BasicAuthorizationCredentialsFactory $factory
-    ) {
-        $this->validator = $validator;
-        $this->factory = $factory;
+    public function __construct(ServerRequest $serverRequest, RequestClientsProvider $clients)
+    {
         $this->serverRequest = $serverRequest;
+        $this->clients = $clients;
     }
+
 
     /**
      * Handle an incoming request
@@ -53,17 +36,15 @@ class BasicAuthClients
      */
     public function handle($request, callable $next, ...$scopes)
     {
-        if (null === ($credentials = $this->factory->create($request))) {
-            // throw not found exception if base64 is null or false
-            throw new AuthorizationException('basic auth string not found', 401);
-        }
-
         try {
+            if (is_null($client = $this->clients->getRequestClient($request))) {
+                throw new AuthorizationException('basic auth client not found', 401);
+            }
+            $client->validate($scopes, $this->serverRequest->getRequestIp($request));
             // pass the server request through credentials validation layer
-            $this->validator->validate($credentials, $scopes, $this->serverRequest->getRequestIp($request));
             if ($request->attributes) {
                 // Added __X_REQUEST_CLIENT__ to request attributes
-                $request->attributes->add(['__X_REQUEST_CLIENT__' => $credentials]);
+                $request->attributes->add(['__X_REQUEST_CLIENT__' => $client]);
             }
             // next request
             return $next($request);

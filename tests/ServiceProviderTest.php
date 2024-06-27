@@ -1,6 +1,7 @@
 <?php
 
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository;
+use Drewlabs\Laravel\Oauth\Clients\Middleware\BasicAuthClients;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\Clients;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
@@ -8,10 +9,8 @@ use Drewlabs\Laravel\Oauth\Clients\ServiceProvider;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\Config;
 use Drewlabs\Oauth\Clients\Argon2iHashClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\ClientsRepository as AbstractClientsRepository;
-use Drewlabs\Oauth\Clients\Contracts\CredentialsIdentityValidator;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\VerifyClientSecretInterface;
-use Drewlabs\Oauth\Clients\CredentialsValidator;
 use Drewlabs\Oauth\Clients\PasswordVerifyClientSecretEngine;
 use Drewlabs\Oauth\Clients\PlainTextHashClientSecret;
 use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
@@ -58,14 +57,15 @@ class ServiceProviderTest extends TestCase
         // Assert
         $this->assertInstanceOf(PlainTextHashClientSecret::class, Container::getInstance()->get(HashesClientSecret::class));
         $this->assertInstanceOf(VerifyPlainTextSecretEngine::class, Container::getInstance()->get(VerifyClientSecretInterface::class));
-        $this->assertInstanceOf(CredentialsValidator::class, Container::getInstance()->get(CredentialsIdentityValidator::class));
+
 
         // Prevent failure with key being null
         // Act
         Container::getInstance()->get('config')->set('clients.credentials.jwt.key', 'AppSecret');
 
         // Assert
-        $this->assertInstanceOf(CredentialsPipelineFactory::class, Container::getInstance()->get(CredentialsPipelineFactory::class));
+        $this->assertInstanceOf(BasicAuthClients::class, Container::getInstance()->get(BasicAuthClients::class));
+        $this->assertInstanceOf(Clients::class, Container::getInstance()->get(Clients::class));
         $this->assertInstanceOf(JwtAuthClients::class, Container::getInstance()->get(JwtAuthClients::class));
         $this->assertInstanceOf(Clients::class, Container::getInstance()->get(Clients::class));
         $this->assertInstanceOf(FirstPartyClients::class, Container::getInstance()->get(FirstPartyClients::class));

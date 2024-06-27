@@ -21,6 +21,7 @@ use Illuminate\Console\Command;
 use InvalidArgumentException as GlobalInvalidArgumentException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Exception\LogicException;
+use Drewlabs\Laravel\Oauth\Clients\Client;
 
 class CreateOauthClients extends Command
 {
@@ -88,12 +89,14 @@ class CreateOauthClients extends Command
             ->setScopes(empty($scopes) ? [] : $scopes)
             ->setSecret($this->option('secret'));
 
+        /** @var Client */
         $client = null !== $id ? $this->clientsRepository->updateById($id, $newClient) : $this->clientsRepository->create($newClient);
 
         $this->info('Client successfully created!');
         $this->info(sprintf('Client ID: %s', $client->getKey()));
-        $this->info(sprintf('Client Authorized Addresses: %s', Str::join($client->getIpAddressesAttribute(), ', ')));
-        $this->info(sprintf('Client Secret: %s', $client->getPlainSecretAttribute()));
+        $this->info(sprintf('Client Authorized Addresses: %s', Str::join($client->getIpAddresses(), ', ')));
+        $this->info(sprintf('Client Secret: %s', $client->getPlainTextSecret()));
+        $this->info(sprintf('Client API Access Token: %s', $client->getApiKey()));
         $this->info(sprintf('Client Credential Expiration Date: %s', $client->getExpiresAt()));
     }
 }

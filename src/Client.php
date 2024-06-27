@@ -44,13 +44,14 @@ class Client implements PlainTextSecretAware, \JsonSerializable, SecretClientInt
         $attributes['personal_access_client'] = (bool) ($attributes['personal_access_client'] ?? false);
         $attributes['password_client'] = (bool) ($attributes['password_client'] ?? false);
         $attributes['revoked'] = $this->isRevoked();
-        $attributes['ip_addresses'] = $this->getIpAddressesAttribute();
+        $attributes['ip_addresses'] = $this->getIpAddresses();
         $attributes['scopes'] = $this->getScopes();
         $plainTextSecret = $this->plainTextSecret;
         if (null === $plainTextSecret) {
             $plainTextSecret = sprintf('%s***', uniqid());
         }
         $attributes['plain_secret'] = $plainTextSecret;
+        $attributes['api_key'] = $this->getApiKey();
 
         return $attributes;
     }

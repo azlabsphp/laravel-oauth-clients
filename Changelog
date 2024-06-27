@@ -7,3 +7,10 @@
 ## v0.3.0 [2024-06-18]
 
 - Added support for laravel version 11 and added support for drewlabs helpers and query-contracts libraries version 0.3.x
+
+## v0.3.1 [2024-06-27]
+
+- Reviewed middleware implementations to be compatible with latest changes from oauth-clients library
+- Deprecated `Drewlabs\Laravel\Oauth\Clients\Contracts\AttributesAware` contract
+- Deprecated `Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsProvider` implementation
+- Added support for plain text api key clients which are passed through `Authorization: access_token <TOKEN>` or `Authorization: api_key <TOKEN>` headers

@@ -169,9 +169,8 @@ class ClientsRepository implements AbstractClientsRepository
     private function createSecret()
     {
         if (\is_int($this->keyLength)) {
-            printf('Key lenght is int: %d', $this->keyLength);
-
-            return str_replace('.', '', sprintf('%s_%s', $this->apiKeyPrefix, base64_encode(bin2hex(random_bytes((int) ($this->keyLength / 2))))));
+            $base64 = base64_encode(bin2hex(random_bytes((int) ($this->keyLength / 2))));
+            return str_replace('.', '', sprintf('%s_%s', rtrim($this->apiKeyPrefix, '_'), rtrim($base64, '=')));
         }
         $key = \call_user_func($this->keyLength);
 

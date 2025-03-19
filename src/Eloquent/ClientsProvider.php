@@ -23,14 +23,10 @@ use Drewlabs\Oauth\Clients\Contracts\VerifyClientSecretInterface;
  */
 class ClientsProvider implements ClientProviderInterface
 {
-    /**
-     * @var ClientsRepository
-     */
+    /** @var ClientsRepository */
     private $repository;
 
-    /**
-     * @var VerifyClientSecretInterface
-     */
+    /** @var VerifyClientSecretInterface */
     private $secretVerifier;
 
     /**

@@ -1,8 +1,10 @@
 <?php
 
+namespace Drewlabs\Laravel\Oauth\Clients\Tests;
+
 use Drewlabs\Core\Helpers\Rand;
 use Drewlabs\Core\Helpers\UUID;
-use Drewlabs\Laravel\Oauth\Clients\Contracts\AttributesAware;
+use Drewlabs\Oauth\Clients\Contracts\AttributesAware;
 use Drewlabs\Laravel\Oauth\Clients\Eloquent\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Tests\Stubs\NewClientFactory;
 use Drewlabs\Oauth\Clients\Contracts\ClientInterface;
@@ -239,7 +241,7 @@ class ClientsRepositoryTest extends TestCase
         $result = $repository->create((new NewClientFactory)->create(null, 'Test Client', null, false, false));
 
         // Assert
-        $this->assertEquals($plainSecret, $result->getPlainSecretAttribute());
+        $this->assertEquals($plainSecret, $result->getPlainTextSecret());
     }
 
     public function test_clients_repository_update_by_id_call_hasher_hash_secret_if_a_secret_key_is_provided()

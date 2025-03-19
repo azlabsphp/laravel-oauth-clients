@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Laravel\Oauth\Clients\Tests;
+
 use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\FirstPartyClients;
@@ -21,7 +23,7 @@ class FirstPartyMiddlewareTest extends TestCase
 {
 
 
-    private function createClientsMiddleware(ClientsRepository $repository = null, CredentialsFactoryInterface $factory = null, ClientInterface $client = null)
+    private function createClientsMiddleware(?ClientsRepository $repository = null, ?CredentialsFactoryInterface $factory = null, ?ClientInterface $client = null)
     {
         if (is_null($client)) {
             $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
@@ -85,7 +87,7 @@ class FirstPartyMiddlewareTest extends TestCase
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke')
-            ->willReturn(new stdClass);
+            ->willReturn(new \stdClass);
         $middleware = $this->createClientsMiddleware();
 
         // Act
@@ -131,7 +133,7 @@ class FirstPartyMiddlewareTest extends TestCase
         $next = $this->createMock(Callback::class);
         $next->expects($this->once())
             ->method('__invoke')
-            ->willReturn($result = new stdClass);
+            ->willReturn($result = new \stdClass);
         $middleware = $this->createClientsMiddleware(null, $factory, $client);
 
         // Act

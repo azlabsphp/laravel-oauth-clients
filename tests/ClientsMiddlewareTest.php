@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Laravel\Oauth\Clients\Tests;
+
 use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\ApiKeyClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\Clients;
@@ -22,7 +24,7 @@ use PHPUnit\Framework\TestCase;
 class ClientsMiddlewareTest extends TestCase
 {
 
-    private function createClientsMiddleware(ClientsRepository $repository = null, CredentialsFactoryInterface $factory = null)
+    private function createClientsMiddleware(?ClientsRepository $repository = null, ?CredentialsFactoryInterface $factory = null)
     {
         if (is_null($repository)) {
             $client = $this->createMockForIntersectionOfInterfaces([SecretClientInterface::class, Validatable::class]);
@@ -87,7 +89,7 @@ class ClientsMiddlewareTest extends TestCase
          */
         $next = $this->createMock(Callback::class);
         $next->method('__invoke')
-            ->willReturn(new stdClass);
+            ->willReturn(new \stdClass);
 
         // Act
         $this->createClientsMiddleware()->handle($request, $next);
@@ -118,7 +120,7 @@ class ClientsMiddlewareTest extends TestCase
         $next = $this->createMock(Callback::class);
         $next->expects($this->once())
             ->method('__invoke')
-            ->willReturn($result = new stdClass);
+            ->willReturn($result = new \stdClass);
 
         // Act
         $response = $this->createClientsMiddleware(null, $factory)->handle($request, $next);

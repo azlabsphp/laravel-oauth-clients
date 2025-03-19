@@ -15,7 +15,7 @@ class NewClientFactory
      * @param bool $password 
      * @return NewClient 
      */
-    public function create($id = null, string $name = null, string $secret = null, bool $personal = null, bool $password = null)
+    public function create($id = null, ?string $name = null, ?string $secret = null, ?bool $personal = null, ?bool $password = null)
     {
         return (new NewClient($id, $personal, $password))->setName($name)->setSecret($secret);
     }

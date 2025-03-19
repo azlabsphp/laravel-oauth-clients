@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Laravel\Oauth\Clients\Tests;
+
 use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\BasicAuthClients;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
@@ -132,7 +134,7 @@ class BasicAuthClientsTest extends TestCase
 
         $next->expects($this->once())
             ->method('__invoke')
-            ->willReturn($response = new stdClass);
+            ->willReturn($response = new \stdClass);
 
         // Act
         $result = $middleware->handle($request, $next);

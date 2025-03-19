@@ -1,5 +1,7 @@
 <?php
 
+namespace Drewlabs\Laravel\Oauth\Clients\Tests;
+
 use Drewlabs\Laravel\Oauth\Clients\Contracts\ClientsRepository;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\CredentialClientsProvider;
 use Drewlabs\Laravel\Oauth\Clients\Middleware\JwtAuthClients;
@@ -30,7 +32,7 @@ class JwtAuthClientsTest extends TestCase
      * @throws Exception 
      * @throws NoPreviousThrowableException 
      */
-    private function createjwtClientsMiddleware($repository = null, CredentialsFactoryInterface  $factory = null, ClientInterface $client  = null)
+    private function createjwtClientsMiddleware($repository = null, ?CredentialsFactoryInterface  $factory = null, ?ClientInterface $client  = null)
     {
 
         if (is_null($client)) {
@@ -163,7 +165,7 @@ class JwtAuthClientsTest extends TestCase
                 }
             });
 
-        $response = new stdClass;
+        $response = new \stdClass;
         $next->expects($this->once())
             ->method('__invoke')
             ->willReturn($response);
@@ -207,7 +209,7 @@ class JwtAuthClientsTest extends TestCase
 
         $next->expects($this->once())
             ->method('__invoke')
-            ->willReturn($response = new stdClass);
+            ->willReturn($response = new \stdClass);
 
         // Act
         $result = $middleware->handle($request, $next);

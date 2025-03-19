@@ -32,7 +32,7 @@ class Client implements PlainTextSecretAware, \JsonSerializable, SecretClientInt
     /**
      * Create client instance.
      */
-    public function __construct(AttributesAware $instance, string $plainTextSecret = null)
+    public function __construct(AttributesAware $instance, ?string $plainTextSecret = null)
     {
         $this->instance = $instance;
         $this->plainTextSecret = $plainTextSecret;
@@ -66,7 +66,7 @@ class Client implements PlainTextSecretAware, \JsonSerializable, SecretClientInt
         return $this->instance->getAttribute('ip_addresses');
     }
 
-    public function validate(array $scopes = [], string $ip = null): bool
+    public function validate(array $scopes = [], ?string $ip = null): bool
     {
 
         // Case the client is revoked, we throw an authorization exception

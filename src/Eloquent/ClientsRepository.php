@@ -21,6 +21,7 @@ use Drewlabs\Oauth\Clients\Contracts\ClientInterface;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Drewlabs\Oauth\Clients\Contracts\NewClientInterface;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Drewlabs\Oauth\Clients\Contracts\AttributesAware;
 
 class ClientsRepository implements AbstractClientsRepository
 {
@@ -41,7 +42,7 @@ class ClientsRepository implements AbstractClientsRepository
      *
      * @param int|callable $keyLength
      */
-    public function __construct(Builder $builder, HashesClientSecret $secretHasher, $keyLength = 32, string $apiKeyPrefix = null)
+    public function __construct(Builder $builder, HashesClientSecret $secretHasher, $keyLength = 32, ?string $apiKeyPrefix = null)
     {
         $this->builder = $builder;
         $this->secretHasher = $secretHasher;
@@ -60,8 +61,8 @@ class ClientsRepository implements AbstractClientsRepository
 
     public function findByUserId($identifier): array
     {
-        return $this->builder->where('user_id', (string) $identifier)->get()->map(static function ($client) {
-            return new Client($client);
+        return $this->builder->where('user_id', (string) $identifier)->get()->map(static function (AttributesAware $item) {
+            return new Client($item);
         })->all();
     }
 
@@ -73,7 +74,7 @@ class ClientsRepository implements AbstractClientsRepository
         return null === $client ? null : new Client($client);
     }
 
-    public function updateById($id, NewClientInterface $attributes, \Closure $callback = null)
+    public function updateById($id, NewClientInterface $attributes, ?\Closure $callback = null)
     {
         $plainText = $attributes->getSecret();
         $hashedSecret = null;
@@ -108,17 +109,18 @@ class ClientsRepository implements AbstractClientsRepository
         $this->builder->where('id', $id)->update($attributes);
 
         // Query for client if the result of the update query is not 0
-        $client = $this->builder->where('id', (string) $id)->first();
+        /** @var AttributesAware */
+        $result = $this->builder->where('id', (string) $id)->first();
 
-        $callback = $callback ?? static function (ClientInterface $client = null) {
+        $callback = $callback ?? static function (?ClientInterface $client = null) {
             return $client;
         };
 
         // Call the callback function on the new client instance
-        return \call_user_func_array($callback, [null === $client ? null : new Client($client, $plainText)]);
+        return \call_user_func_array($callback, [null === $result ? null : new Client($result, $plainText)]);
     }
 
-    public function create(NewClientInterface $attributes, \Closure $callback = null)
+    public function create(NewClientInterface $attributes, ?\Closure $callback = null)
     {
         $plainText = $attributes->getSecret();
         $plainText = $plainText ?? $this->createSecret();
@@ -151,7 +153,7 @@ class ClientsRepository implements AbstractClientsRepository
         return \call_user_func_array($callback, [new Client($client, $plainText)]);
     }
 
-    public function deleteById($id, \Closure $callback = null)
+    public function deleteById($id, ?\Closure $callback = null)
     {
         $result = $this->builder->where('id', $id)->delete();
         $callback = $callback ?? static function ($value) {

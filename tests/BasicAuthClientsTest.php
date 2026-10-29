@@ -17,6 +17,7 @@ use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
 use PHPUnit\Framework\InvalidArgumentException;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Event\NoPreviousThrowableException;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -29,6 +30,7 @@ class BasicAuthClientsTest extends TestCase
      * @throws Exception 
      * @throws NoPreviousThrowableException 
      */
+    #[AllowMockObjectsWithoutExpectations]
     private function createBasicAuthMiddleware($repository = null, $secretVerifier = null)
     {
         $serverRequest = new ServerRequest;
@@ -40,6 +42,7 @@ class BasicAuthClientsTest extends TestCase
         return new BasicAuthClients($serverRequest, $clientsProvider);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_basic_auth_clients_throws_authorization_exception_case_request_does_not_have_basic_auth_header()
     {
         // Initialize
@@ -66,6 +69,7 @@ class BasicAuthClientsTest extends TestCase
         $middleware->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_basic_auth_clients_throws_authorization_exception_case_request_has_incorrect_basic_authorization_header()
     {
         $this->expectException(AuthorizationException::class);
@@ -93,6 +97,7 @@ class BasicAuthClientsTest extends TestCase
         $middleware->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_basic_auth_client_call_next_function_with_request_instance_case_base_64_credentials_is_provided_and_repository_returns_a_client_instance()
     {
         // Initialize

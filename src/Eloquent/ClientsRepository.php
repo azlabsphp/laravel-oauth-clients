@@ -109,7 +109,7 @@ class ClientsRepository implements AbstractClientsRepository
         $this->builder->where('id', $id)->update($attributes);
 
         // Query for client if the result of the update query is not 0
-        /** @var AttributesAware */
+        /** @var AttributesAware|null $result */
         $result = $this->builder->where('id', (string) $id)->first();
 
         $callback = $callback ?? static function (?ClientInterface $client = null) {

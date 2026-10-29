@@ -11,12 +11,14 @@ use Drewlabs\Oauth\Clients\Contracts\ClientInterface;
 use Drewlabs\Oauth\Clients\Contracts\HashesClientSecret;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class ClientsRepositoryTest extends TestCase
 {
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_find_by_user_id_returns_empty_array_if_builder_returns_an_empty_collection()
     {
         //Initialize
@@ -46,6 +48,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertTrue(empty($result));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_return_an_array_of_client_interface_if_builder_returns_a_non_empty_collection()
     {
         //Initialize
@@ -87,6 +90,7 @@ class ClientsRepositoryTest extends TestCase
 
 
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_find_by_user_id_returns_null_if_builder_first_return_null()
     {
         //Initialize
@@ -116,6 +120,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_return_a_client_interface_if_builder_first_returns_an_attribute_aware_instance()
     {
         //Initialize
@@ -155,6 +160,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertInstanceOf(ClientInterface::class, $result);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_create_call_builder_create_method_and_return_client_with_secret_key_if_none_is_provided()
     {
         //Initialize
@@ -207,6 +213,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertEquals($plainText, $result->getPlainTextSecret());
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_client_repository_create_call_builder_create_method_and_return_client_interface_instance()
     {
         //Initialize
@@ -244,6 +251,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertEquals($plainSecret, $result->getPlainTextSecret());
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_repository_update_by_id_call_hasher_hash_secret_if_a_secret_key_is_provided()
     {
         //Initialize
@@ -295,6 +303,7 @@ class ClientsRepositoryTest extends TestCase
         $repository->updateById($uuid, (new NewClientFactory)->create(null, 'Test Client', $plainSecret));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_repository_update_by_id_does_not_call_hasher_hash_secret_if_no_secret_key_is_provided()
     {
 
@@ -338,6 +347,7 @@ class ClientsRepositoryTest extends TestCase
         $repository->updateById($uuid, (new NewClientFactory)->create(null, 'Test Client'));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_repository_update_by_id_call_builder_where_and_first_methods()
     {
 
@@ -354,10 +364,12 @@ class ClientsRepositoryTest extends TestCase
         $builder  = $this->createMock(Builder::class);
 
         $builder
+            ->expects($this->atLeastOnce())
             ->method('update')
             ->with(['name' => 'Test Client', 'revoked' => false, 'ip_addresses' => '*', 'scopes' => []]);
 
         $builder
+            ->expects($this->atLeastOnce())
             ->method('where')
             ->with('id', $uuid)
             ->willReturn($builder);
@@ -379,6 +391,7 @@ class ClientsRepositoryTest extends TestCase
         $repository->updateById($uuid, (new NewClientFactory)->create(null, 'Test Client'));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_repository_update_by_id_return_a_client_interface_instance_if_builder_where_query_return_a_value()
     {
 
@@ -395,10 +408,12 @@ class ClientsRepositoryTest extends TestCase
         $builder  = $this->createMock(Builder::class);
 
         $builder
+            ->expects($this->atLeastOnce())
             ->method('update')
             ->with(['name' => 'Test Client', 'revoked' => false, 'ip_addresses' => '*', 'scopes' => []]);
 
         $builder
+            ->expects($this->atLeastOnce())
             ->method('where')
             ->with('id', $uuid)
             ->willReturn($builder);
@@ -422,6 +437,7 @@ class ClientsRepositoryTest extends TestCase
         $this->assertInstanceOf(ClientInterface::class, $result);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_repository_delete_by_id_call_builder_where_and_delete_methods_once()
     {
 

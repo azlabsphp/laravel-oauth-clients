@@ -18,6 +18,7 @@ use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 
 class FirstPartyMiddlewareTest extends TestCase
 {
@@ -68,6 +69,7 @@ class FirstPartyMiddlewareTest extends TestCase
         return new FirstPartyClients($clientsProvider);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_first_party_clients_middleware_throws_an_authorization_exception_case_credentials_pipeline_factory_returns_a_pipeline_that_returns_null_as_credentials()
     {
         // Assert
@@ -94,6 +96,7 @@ class FirstPartyMiddlewareTest extends TestCase
         $middleware->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_first_party_clients_middleware_returns_next_function_return_value_if_pipeline_factory_creates_a_pipeline_that_returns_a_credentials_instance_with_firstParty_that_returns_true()
     {
         // Initialize
@@ -143,6 +146,7 @@ class FirstPartyMiddlewareTest extends TestCase
         $this->assertEquals($result, $response);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_first_party_clients_middleware_throws_an_authorization_expection_if_firstParty_method_of_the_client_returns_by_validator_does_not_return_true()
     {
         // Assert

@@ -18,7 +18,7 @@ use Drewlabs\Oauth\Clients\Contracts\ServerRequestFacade;
 
 class ServerRequest implements ServerRequestFacade
 {
-    public function getRequestCookie($request, string $name = null)
+    public function getRequestCookie($request, ?string $name = null)
     {
         return \is_string($name) ? $request->cookies->get($name) : $request->cookies->all();
     }
@@ -40,7 +40,7 @@ class ServerRequest implements ServerRequestFacade
         return $request->attributes->get($name);
     }
 
-    public function getAuthorizationHeader($request, string $method = null)
+    public function getAuthorizationHeader($request, ?string $method = null)
     {
         $header = $this->getRequestHeader($request, 'authorization');
         if (null === $header) {

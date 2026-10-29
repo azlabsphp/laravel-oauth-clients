@@ -18,6 +18,7 @@ use Drewlabs\Oauth\Clients\Contracts\Validatable;
 use Drewlabs\Oauth\Clients\CredentialsFactory;
 use Drewlabs\Oauth\Clients\Exceptions\AuthorizationException;
 use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -71,6 +72,7 @@ class ClientsMiddlewareTest extends TestCase
         return new Clients($serverRequest, $clientsProvider);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_middleware_throws_an_authorization_exception_case_credentials_pipeline_factory_returns_a_pipeline_that_returns_null_as_credentials()
     {
         // Assert
@@ -95,6 +97,7 @@ class ClientsMiddlewareTest extends TestCase
         $this->createClientsMiddleware()->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_middleware_returns_next_function_return_value_if_credentials_factory_creates_a_credentials_object_and_repository_return_a_client_object()
     {
         // Initialize
@@ -129,6 +132,7 @@ class ClientsMiddlewareTest extends TestCase
         $this->assertEquals($result, $response);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_middleware_calls_credentials_pipeline_create_method_only_once_with_request_object()
     {
         // Initialize
@@ -161,6 +165,7 @@ class ClientsMiddlewareTest extends TestCase
     }
 
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_clients_middleware_does_not_throw_if_acess_token_header_is_provided_and_repository_findByApiKey_returns_a_client()
     {
         // Initialize

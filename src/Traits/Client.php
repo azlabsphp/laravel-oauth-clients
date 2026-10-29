@@ -40,6 +40,7 @@ trait Client
         return Str::isStr($scopes) ? Str::split($scopes, ',') : $scopes;
     }
 
+    /** @param mixed $value */
     public function setScopesAttribute($value)
     {
         $scopes = $value ?? ['*'];
@@ -67,11 +68,13 @@ trait Client
         return $casts;
     }
 
+    /** @param mixed $value */
     public function setIpAddressesAttribute($value)
     {
         $this->attributes['ip_addresses'] = \is_array($value) ? Str::join($value, ',') : (null === $value ? '*' : $value);
     }
 
+    /** @param mixed $value */
     public function setClientIpAttribute($value)
     {
         $this->setIpAddressesAttribute($value);
@@ -129,6 +132,7 @@ trait Client
         return $this->getScopesAttribute();
     }
 
+    /** @param mixed $scope */
     public function hasScope($scope)
     {
         $clientScopes = $this->getScopes() ?? ['*'];
@@ -236,7 +240,7 @@ trait Client
             unset($this->attributes['revoked']);
         }
 
-        // We unset the columns that may possibly not be present on the application
+        // we unset the columns that may possibly not be present on the application
         // database table due to partial database table definition in previous releases
         $this->unsetMissingColumns($this->getTable(), ['name', 'user_id', 'redirect', 'provider', 'client_url']);
     }

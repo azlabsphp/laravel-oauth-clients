@@ -19,19 +19,13 @@ use Drewlabs\Oauth\Clients\JwtAuthorizationHeaderCredentialsFactory;
 use Drewlabs\Oauth\Clients\JwtCookieCredentialsFactory;
 use Drewlabs\Oauth\Clients\JwtTokenCredentials;
 use Drewlabs\Oauth\Clients\VerifyPlainTextSecretEngine;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class JwtAuthClientsTest extends TestCase
 {
 
-
-    /**
-     * @return BasicAuthClients 
-     * @throws InvalidArgumentException 
-     * @throws Exception 
-     * @throws NoPreviousThrowableException 
-     */
     private function createjwtClientsMiddleware($repository = null, ?CredentialsFactoryInterface  $factory = null, ?ClientInterface $client  = null)
     {
 
@@ -80,6 +74,7 @@ class JwtAuthClientsTest extends TestCase
         return new JwtAuthClients($serverRequest, $clientsProvider);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_jwt_auth_clients_throws_authorization_exception_case_request_does_not_have_jwt_auth_header()
     {
         // Initialize
@@ -108,6 +103,7 @@ class JwtAuthClientsTest extends TestCase
         $middleware->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_jwt_auth_clients_throws_authorization_exception_case_request_has_incorrect_jwt_authorization_header_value()
     {
         $this->expectException(AuthorizationException::class);
@@ -139,6 +135,7 @@ class JwtAuthClientsTest extends TestCase
         $middleware->handle($request, $next);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_jwt_auth_client_call_next_function_with_request_instance_case_jwt_credentials_is_resolved_from_request_headers()
     {
         // Initialize
@@ -177,6 +174,7 @@ class JwtAuthClientsTest extends TestCase
         $this->assertEquals($response, $result);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_jwt_auth_client_call_next_function_with_request_instance_case_jwt_credentials_is_resolved_from_request_cookies()
     {
         // Initialize

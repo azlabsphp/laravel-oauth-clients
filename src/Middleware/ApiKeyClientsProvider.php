@@ -53,7 +53,7 @@ class ApiKeyClientsProvider implements RequestClientsProvider
      */
     private function getApiAccessToken($request)
     {
-        /** @var string */
+        /** @var string|null */
         $accessToken = null;
         if (null === ($accessToken = $this->requestAdapter->getAuthorizationHeader($request, 'access_token'))) {
             $accessToken = $this->requestAdapter->getAuthorizationHeader($request, 'api_key');
